@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.5 - Safe MyISAM to InnoDB conversion
+
+- 0.3.0–0.3.3 tablo oluşturma SQL'lerinin sunucu varsayılan motoruna bağlı kalması nedeniyle oluşabilen MyISAM kök nedeni doğrulandı.
+- Yeni kurulumlar için açık `ENGINE=InnoDB` ve `$wpdb->get_charset_collate()` kullanımı test altına alındı.
+- `SHOW ENGINES`, ALTER yetkisi, tablo boyutu ve satır sayısı ön kontrolleri eklendi.
+- Yalnız yedi güvenilir eklenti tablosunu etkileyen, yönetici onaylı MyISAM → InnoDB dönüşümü eklendi.
+- Option tabanlı ilk repair state ve migration journal ile tablo bazlı başlangıç/bitiş/motor/satır/checksum kaydı eklendi.
+- İlk ALTER hatasında güvenli durma, kısmi durumdan devam ve ikinci çalıştırmada sıfır değişiklik doğrulandı.
+- `innodb_unavailable`, `alter_permission_denied`, `engine_conversion_required`, `engine_conversion_failed` ve `engine_conversion_verified` tanılama kodları eklendi.
+- MariaDB CI matrisi varsayılan MyISAM, veri koruma, ilişkili kayıt, checksum, kısmi dönüşüm ve NTV insert senaryolarıyla genişletildi.
+
 ## 0.3.4 - Database diagnostics and safe repair
 
 - Fiziksel tablo/sütun/index/tür/default/motor/charset/collation denetimi ve güvenli schema fingerprint'i.

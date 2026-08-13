@@ -6,10 +6,13 @@ final class DatabaseRepair
 {
     public function __construct(private readonly object $db) {}
 
-    /** @return array{status:string,changed:int,before:string,after:string,issues:list<array<string,mixed>>} */
-    public function run(bool $automatic=false): array
+    /** @return array{status:string,code:string,changed:int,before:string,after:string,issues:list<array<string,mixed>>} */
+    public function run(bool $automatic=false,bool$engineApproved=false): array
     {
         $health=new DatabaseHealth($this->db);$before=$health->inspect();$changed=0;
+        $missingTables=array_values(array_filter($before['issues'],static fn(array$issue):bool=>($issue['code']??'')==='table_missing'));if($missingTables){$preflight=(new DatabaseEngineRepair($this->db))->preview();if(!$preflight['innodb_available'])return['status'=>'repair_required','code'=>'innodb_unavailable','changed'=>0,'before'=>$before['fingerprint'],'after'=>$before['fingerprint'],'issues'=>$before['issues']];}
+        $engineIssues=array_values(array_filter($before['issues'],static fn(array$issue):bool=>($issue['code']??'')==='engine_mismatch'));
+        if($engineIssues){if($automatic||!$engineApproved)return['status'=>'repair_required','code'=>'engine_conversion_required','changed'=>0,'before'=>$before['fingerprint'],'after'=>$before['fingerprint'],'issues'=>$before['issues']];$engine=(new DatabaseEngineRepair($this->db))->convert();$changed+=$engine['changed'];$before=$health->inspect();}
         $this->ensureJournalTable();$journal=$this->startJournal($before,$automatic);
         try{
             foreach($before['issues']as$issue){$code=$issue['code'];$logical=(string)($issue['table']??'');if($code==='table_missing'&&isset(DatabaseSchema::tables()[$logical])){$this->mustQuery(DatabaseSchema::createSql($logical,$this->db->get_charset_collate()));$changed++;continue;}
@@ -18,7 +21,7 @@ final class DatabaseRepair
             }
             if(!$automatic&&$this->tableExists(Support::table('sources'))){(new SourceMigration($this->db))->run((string)get_option('wpnb_schema_version',''));}
             $after=$health->inspect();if($after['status']==='healthy'||($after['issues']!==[]&&count($after['issues'])===1&&$after['issues'][0]['code']==='schema_version_mismatch')){update_option('wpnb_schema_version',WPNB_SCHEMA_VERSION,false);delete_option('wpnb_source_recovery_required');$after=$health->inspect();}
-            $status=$after['status']==='healthy'?'healthy':'repair_required';$this->finishJournal($journal,$status,['changed'=>$changed,'after_fingerprint'=>$after['fingerprint'],'issues'=>$after['issues']]);return ['status'=>$status,'changed'=>$changed,'before'=>$before['fingerprint'],'after'=>$after['fingerprint'],'issues'=>$after['issues']];
+            $status=$after['status']==='healthy'?'healthy':'repair_required';$code=$status==='healthy'?'engine_conversion_verified':'repair_required';$this->finishJournal($journal,$status,['changed'=>$changed,'after_fingerprint'=>$after['fingerprint'],'issues'=>$after['issues']]);return ['status'=>$status,'code'=>$code,'changed'=>$changed,'before'=>$before['fingerprint'],'after'=>$after['fingerprint'],'issues'=>$after['issues']];
         }catch(\Throwable $e){$after=$health->inspect();$this->finishJournal($journal,'repair_failed',['changed'=>$changed,'after_fingerprint'=>$after['fingerprint'],'error_class'=>get_class($e)]);throw $e;}
     }
 

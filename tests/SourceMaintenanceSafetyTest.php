@@ -90,4 +90,15 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $this->assertStringContainsString('Copy Diagnostic Information',$admin);
         $this->assertStringNotContainsString('$wpdb->last_query',$admin);
     }
+
+    public function testEngineRepairIsConfirmedAllowlistedJournaledAndNeverDestructive():void
+    {
+        $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');$engine=file_get_contents(dirname(__DIR__).'/includes/DatabaseEngineRepair.php');
+        $this->assertStringContainsString('confirm_engine_conversion',$admin);$this->assertStringContainsString('required>',$admin);$this->assertStringContainsString("requirePostAction('wpnb_repair_database')",$admin);
+        $this->assertStringContainsString("'db_unknown'",$admin);$this->assertStringContainsString("'engine_conversion_required'",$admin);
+        foreach(['migration_journal','sources','feed_items','jobs','ai_generations','logs','daily_usage']as$table)$this->assertStringContainsString("'$table'",$engine);
+        foreach(['innodb_unavailable','alter_permission_denied','engine_conversion_required','engine_conversion_failed','engine_conversion_verified']as$code)$this->assertStringContainsString($code,$engine.$admin);
+        $this->assertStringContainsString('SHOW ENGINES',$engine);$this->assertStringContainsString('SHOW GRANTS FOR CURRENT_USER',$engine);$this->assertStringContainsString('CHECKSUM TABLE',$engine);$this->assertStringContainsString('ENGINE=InnoDB',$engine);$this->assertStringContainsString("update_option(self::STATE_OPTION,\$state,false)",$engine);
+        $this->assertStringNotContainsString('DROP TABLE',$engine);$this->assertStringNotContainsString('TRUNCATE',$engine);$this->assertStringNotContainsString('wp_posts',$engine);$this->assertStringNotContainsString('$this->db->query($_',$engine);
+    }
 }

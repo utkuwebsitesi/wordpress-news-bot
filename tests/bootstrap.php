@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 if (!defined('ARRAY_A')) { define('ARRAY_A', 'ARRAY_A'); }
-if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.3.4'); }
-if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '1.5.0'); }
+if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.3.5'); }
+if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '1.6.0'); }
 $GLOBALS['wpnb_test_options'] = [];
 if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags(string $v): string { return trim(strip_tags($v)); } }
 if (!function_exists('wp_trim_words')) { function wp_trim_words(string $v, int $n): string { return implode(' ', array_slice(preg_split('/\s+/', trim($v)) ?: [], 0, $n)); } }
@@ -25,7 +25,7 @@ if (!function_exists('get_option')) { function get_option(string $key,mixed $def
 if (!function_exists('update_option')) { function update_option(string $key,mixed $value,mixed $autoload=null):bool { $GLOBALS['wpnb_test_options'][$key]=$value;return true; } }
 if (!function_exists('delete_option')) { function delete_option(string $key):bool { unset($GLOBALS['wpnb_test_options'][$key]);return true; } }
 if (!function_exists('wp_remote_retrieve_header')) { function wp_remote_retrieve_header(array $r, string $name): string { return (string)($r['headers'][$name] ?? ''); } }
-require dirname(__DIR__) . '/includes/FeedParser.php'; require dirname(__DIR__) . '/includes/SourceUrl.php'; require dirname(__DIR__) . '/includes/Security.php'; require dirname(__DIR__) . '/includes/Support.php'; require dirname(__DIR__) . '/includes/DatabaseErrorClassifier.php'; require dirname(__DIR__) . '/includes/DatabaseSchema.php'; require dirname(__DIR__) . '/includes/DatabaseHealth.php'; require dirname(__DIR__) . '/includes/DiagnosticStore.php'; require dirname(__DIR__) . '/includes/DatabaseRepair.php';
+require dirname(__DIR__) . '/includes/FeedParser.php'; require dirname(__DIR__) . '/includes/SourceUrl.php'; require dirname(__DIR__) . '/includes/Security.php'; require dirname(__DIR__) . '/includes/Support.php'; require dirname(__DIR__) . '/includes/DatabaseErrorClassifier.php'; require dirname(__DIR__) . '/includes/DatabaseSchema.php'; require dirname(__DIR__) . '/includes/DatabaseHealth.php'; require dirname(__DIR__) . '/includes/DiagnosticStore.php'; require dirname(__DIR__) . '/includes/DatabaseEngineRepairException.php'; require dirname(__DIR__) . '/includes/DatabaseEngineRepair.php'; require dirname(__DIR__) . '/includes/DatabaseRepair.php';
 require dirname(__DIR__) . '/includes/AiProvider.php'; require dirname(__DIR__) . '/includes/MockAiProvider.php'; require dirname(__DIR__) . '/includes/ContentSanitizer.php'; require dirname(__DIR__) . '/includes/AiResponseValidator.php'; require dirname(__DIR__) . '/includes/OpenAiProvider.php'; require dirname(__DIR__) . '/includes/SecretStorage.php'; require dirname(__DIR__) . '/includes/Credentials.php'; require dirname(__DIR__) . '/includes/ConnectionService.php'; require dirname(__DIR__) . '/includes/SetupState.php'; require dirname(__DIR__) . '/includes/DraftPolicy.php';
 require dirname(__DIR__) . '/includes/SourceTestException.php'; require dirname(__DIR__) . '/includes/SourceConnectionTester.php'; require dirname(__DIR__) . '/includes/SourceService.php'; require dirname(__DIR__) . '/includes/SourceRecoveryRequired.php'; require dirname(__DIR__) . '/includes/SourceMigration.php';
 require __DIR__ . '/SqliteWpdb.php';

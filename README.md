@@ -1,6 +1,6 @@
 # WordPress News Bot
 
-Current release: `0.3.4`
+Current release: `0.3.5`
 
 Geliştirici: **Utkuweb**
 
@@ -11,6 +11,8 @@ Geliştirici: **Utkuweb**
 0.3.3 kaynak testini URL, DNS/IP, HTTP, redirect, Content-Type, body, XML, feed ve veritabanı aşamalarında güvenli sonuç kodlarıyla izler. RSS 2.0, RSS 1.0/RDF ve Atom; XML charset değerleri ve genel Content-Type ile gelen geçerli feed'ler desteklenir. Başarısız form girdileri korunur, başarılı test sonucu kısa süreli kullanıcı/form tokenıyla yeniden kullanılabilir ve migration uyarısı kullanıcı tarafından kapatılabilir.
 
 0.3.4 fiziksel veritabanı şemasını kayıtlı sürümden bağımsız denetler. Sistem Sağlığı ekranı tablo, sütun, index, motor ve collation durumunu içerik göstermeden raporlar; güvenli ve idempotent onarım eksik yapıları migration journal ile tamamlar. RSS testi başarılı olduğu halde şema bozuksa aynı test tokenı korunur ve onarım sonrasında yeniden HTTP isteği yapılmadan kaynak kaydedilebilir.
+
+0.3.5 eski kurulumlarda sunucu varsayılanı nedeniyle MyISAM oluşmuş WordPress News Bot tablolarını, yönetici onayı ve InnoDB/ALTER ön kontrolünden sonra veri korumalı biçimde InnoDB'ye dönüştürür. Tablolar güvenilir allowlist sırasıyla tek tek işlenir; satır sayısı, checksum ve motor her adımda doğrulanır. Yeni tablolar sunucu varsayılanından bağımsız olarak açıkça `ENGINE=InnoDB` ve WordPress charset/collation değeriyle oluşturulur.
 
 Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
 

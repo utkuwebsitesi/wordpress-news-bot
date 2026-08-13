@@ -18,6 +18,7 @@ final class DatabaseErrorClassifier
             in_array($errno, [1067, 1292], true) || str_contains($message, 'invalid default') => 'db_invalid_default',
             $errno === 1267 || str_contains($message, 'collation') || str_contains($message, 'character set') => 'db_collation_mismatch',
             in_array($errno, [1044, 1045, 1142, 1227], true) || str_contains($message, 'access denied') || str_contains($message, 'command denied') => 'db_permission_denied',
+            in_array($errno, [1021, 1114], true) || str_contains($message, 'disk full') || str_contains($message, 'table is full') => 'db_disk_full',
             default => 'db_unknown',
         };
         $suggestions = [
@@ -30,6 +31,7 @@ final class DatabaseErrorClassifier
             'db_invalid_default'=>'Review the physical column default before repair.',
             'db_collation_mismatch'=>'Align the table charset and collation with WordPress after taking a backup.',
             'db_permission_denied'=>'Grant the WordPress database user the required CREATE and ALTER privileges.',
+            'db_disk_full'=>'Free sufficient database disk space before retrying the engine conversion.',
             'db_unknown'=>'Use the Test ID in Diagnostics and review the database health report.',
         ];
         return ['code'=>$code,'suggestion'=>$suggestions[$code],'errno'=>$errno,'error_fingerprint'=>substr(hash('sha256',$message),0,16)];

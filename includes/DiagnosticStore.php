@@ -7,7 +7,7 @@ final class DiagnosticStore
     private const OPTION='wpnb_diagnostics';
     public static function record(string $testId,string $stage,string $code,string $operation,array $context=[]):void
     {
-        $allowed=['affected_rows','schema_fingerprint','db_errno','error_fingerprint','suggestion'];$safe=[];foreach($allowed as$key)if(isset($context[$key]))$safe[$key]=is_int($context[$key])?(int)$context[$key]:sanitize_text_field((string)$context[$key]);
+        $allowed=['affected_rows','schema_fingerprint','db_errno','error_fingerprint','suggestion','table','from_engine','to_engine','rows_before','rows_after','checksum_before','checksum_after','total_rows','total_bytes'];$safe=[];foreach($allowed as$key)if(isset($context[$key]))$safe[$key]=is_int($context[$key])?(int)$context[$key]:sanitize_text_field((string)$context[$key]);
         $record=['test_id'=>sanitize_text_field($testId),'stage'=>sanitize_key($stage),'db_code'=>sanitize_key($code),'operation'=>sanitize_key($operation),'plugin_version'=>WPNB_VERSION,'schema_version'=>WPNB_SCHEMA_VERSION,'time'=>Support::now()]+$safe;
         $records=array_values(array_filter((array)get_option(self::OPTION,[]),static fn($row):bool=>is_array($row)&&isset($row['test_id'])));array_unshift($records,$record);update_option(self::OPTION,array_slice($records,0,100),false);
     }
