@@ -31,4 +31,12 @@ final class DatabaseSchema
     }
 
     public static function identifier(string $name): string { return '`'.str_replace('`','``',$name).'`'; }
+
+    /** @param array<string,mixed> $data @return list<string> */
+    public static function formatsFor(string $logical, array $data): array
+    {
+        $columns=self::tables()[$logical]['columns']??throw new \InvalidArgumentException('Unknown table schema.');$formats=[];
+        foreach(array_keys($data)as$column){$ddl=$columns[$column]??throw new \InvalidArgumentException('Unknown table column.');$type=strtolower(strtok($ddl,' '));$formats[]=preg_match('/^(?:tinyint|smallint|mediumint|int|bigint)/',$type)?'%d':(str_starts_with($type,'decimal')?'%f':'%s');}
+        return$formats;
+    }
 }

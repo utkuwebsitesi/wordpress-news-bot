@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0-rc.1 - Stabilization and release candidate gates
+
+- Gerçek import ile kaynak bağlantı testinin SSRF, DNS, redirect, response-size ve feed doğrulama motoru birleştirildi.
+- Canonical veritabanı şeması INSERT/UPDATE formatlarının tek kaynağı haline getirildi; şema fingerprint'inden değişken satır/byte değerleri çıkarıldı.
+- Taslak üretiminde atomik option kilidi, eşzamanlı kota rezervasyonu, job/generation günlüğü ve kontrollü hata geri alma eklendi.
+- Bütün admin mutasyonları POST, capability ve nonce kapılarına alındı; haber havuzu tekli/toplu taslak eylemleri gerçek ayar limitini kullanıyor.
+- Docker tabanlı WordPress 7.0.4/PHP 8.3/MariaDB 10.11 MyISAM ve InnoDB ortamları ile WordPress 6.4/PHP 8.1 minimum ortamı eklendi.
+- Gerçek ZIP install/activate/deactivate/reactivate, 0.3.0–0.3.5 upgrade matrisi, yerel deterministik RSS/OpenAI servisi ve Playwright admin E2E gate'leri eklendi.
+- ZIP, PHP lint, PHPUnit/MariaDB, Composer, npm audit, i18n, secret ve eski kimlik taramaları tek RC gate altında birleştirildi.
+- Bu sürüm release candidate'dır; production deploy ve stable `0.4.0` etiketi içermez.
+
 ## 0.3.5 - Safe MyISAM to InnoDB conversion
 
 - 0.3.0–0.3.3 tablo oluşturma SQL'lerinin sunucu varsayılan motoruna bağlı kalması nedeniyle oluşabilen MyISAM kök nedeni doğrulandı.

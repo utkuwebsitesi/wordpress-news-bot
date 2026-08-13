@@ -59,15 +59,14 @@ final class SourceService
             $record['last_error'] = null;
         }
         if ($sourceId > 0) {
-            $ok = $this->db->update(Support::table('sources'), $record, ['id' => $sourceId], ['%s','%s','%s','%s','%d','%d','%s',...($testResult!==null?['%s','%s','%s']:[])], ['%d']);
+            $ok = $this->db->update(Support::table('sources'), $record, ['id' => $sourceId], DatabaseSchema::formatsFor('sources',$record), ['%d']);
             if ($ok === false) {
                 $this->throwDatabaseError($testId,'source_update');
             }
             return $sourceId;
         }
         $record['created_at'] = $now;
-        $formats=['%s','%s','%s','%s','%d','%d','%s'];if($testResult!==null)$formats=array_merge($formats,['%s','%s','%s']);$formats[]='%s';
-        $ok = $this->db->insert(Support::table('sources'), $record, $formats);
+        $ok = $this->db->insert(Support::table('sources'), $record, DatabaseSchema::formatsFor('sources',$record));
         if ($ok === false || (int)$ok !== 1) {
             $this->throwDatabaseError($testId,'source_insert');
         }

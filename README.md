@@ -1,6 +1,8 @@
 # WordPress News Bot
 
-Current release: `0.3.5`
+Current candidate: `0.4.0-rc.1`
+
+Durum: **release candidate**. Production deploy yapılmamıştır; stable `0.4.0` için gerçek pilot onayı beklenmektedir.
 
 Geliştirici: **Utkuweb**
 
@@ -13,6 +15,8 @@ Geliştirici: **Utkuweb**
 0.3.4 fiziksel veritabanı şemasını kayıtlı sürümden bağımsız denetler. Sistem Sağlığı ekranı tablo, sütun, index, motor ve collation durumunu içerik göstermeden raporlar; güvenli ve idempotent onarım eksik yapıları migration journal ile tamamlar. RSS testi başarılı olduğu halde şema bozuksa aynı test tokenı korunur ve onarım sonrasında yeniden HTTP isteği yapılmadan kaynak kaydedilebilir.
 
 0.3.5 eski kurulumlarda sunucu varsayılanı nedeniyle MyISAM oluşmuş WordPress News Bot tablolarını, yönetici onayı ve InnoDB/ALTER ön kontrolünden sonra veri korumalı biçimde InnoDB'ye dönüştürür. Tablolar güvenilir allowlist sırasıyla tek tek işlenir; satır sayısı, checksum ve motor her adımda doğrulanır. Yeni tablolar sunucu varsayılanından bağımsız olarak açıkça `ENGINE=InnoDB` ve WordPress charset/collation değeriyle oluşturulur.
+
+0.4.0-rc.1 stabilizasyon çalışması gerçek release ZIP kurulumunu, WordPress 7.0.4/6.4 ve PHP 8.3/8.1 ortamlarını, MyISAM/InnoDB varsayılanlarını, 0.3.0–0.3.5 upgrade matrisini ve Playwright admin akışlarını kalıcı CI gate'lerine bağlar. Gerçek import artık bağlantı testiyle aynı SSRF/DNS/redirect motorunu kullanır; fiziksel şema ve yazma formatları canonical tanımdan türetilir; taslak üretimi atomik kilit ve kota rezervasyonu kullanır.
 
 Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
 

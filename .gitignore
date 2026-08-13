@@ -10,4 +10,5 @@ coverage/
 /.phpunit.cache/
 /.idea/
 /.vscode/
+/.tmp-history-build/
 Thumbs.db

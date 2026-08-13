@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-if ($argc !== 3) {
-    fwrite(STDERR, "Usage: php package-release.php <staged-plugin-dir> <output.zip>\n");
+if ($argc < 3 || $argc > 4) {
+    fwrite(STDERR, "Usage: php package-release.php <staged-plugin-dir> <output.zip> [expected-version]\n");
     exit(2);
 }
 
@@ -10,6 +10,7 @@ $source = realpath($argv[1]);
 $output = $argv[2];
 $root = 'wordpress-news-bot';
 $required = $root . '/wordpress-news-bot.php';
+$expectedVersion=$argv[3]??'';
 
 if ($source === false || !is_dir($source) || basename($source) !== $root) {
     throw new RuntimeException('Staging plugin directory is invalid.');
@@ -45,13 +46,13 @@ if (!$zip->close()) {
     throw new RuntimeException('Release ZIP could not be finalized.');
 }
 
-$report = validateRelease($output, $root, $required);
+$report = validateRelease($output, $root, $required,$expectedVersion);
 fwrite(STDOUT, 'ZIP entries: ' . $report['entry_count'] . PHP_EOL);
 fwrite(STDOUT, 'ZIP entries containing backslash: ' . $report['backslash_count'] . PHP_EOL);
 fwrite(STDOUT, "ZIP first two levels:\n" . implode(PHP_EOL, $report['first_two_levels']) . PHP_EOL);
 
 /** @return array{entry_count:int,backslash_count:int,first_two_levels:list<string>} */
-function validateRelease(string $archive, string $root, string $required): array
+function validateRelease(string $archive, string $root, string $required,string$expectedVersion=''): array
 {
     $zip = new ZipArchive();
     if ($zip->open($archive) !== true) {
@@ -74,7 +75,7 @@ function validateRelease(string $archive, string $root, string $required): array
         if (!str_starts_with($entry, $root . '/')) {
             throw new RuntimeException('ZIP entry is outside the plugin root: ' . $entry);
         }
-        if (preg_match('~(^|/)(?:\.git|\.github|tests|cache|\.env(?:\..*)?)(?:/|$)~i', $entry) || str_ends_with(strtolower($entry), '.zip')) {
+        if (preg_match('~(^|/)(?:\.git|\.github|\.tmp-history-build|tests|node_modules|coverage|cache|src|\.env(?:\..*)?)(?:/|$)~i', $entry) || preg_match('~/(?:composer\.(?:json|lock)|package(?:-lock)?\.json|playwright\.config\.js|phpunit\.xml\.dist)$~i',$entry) || str_ends_with(strtolower($entry), '.zip')) {
             throw new RuntimeException('Development or generated file found in release ZIP: ' . $entry);
         }
         $parts = explode('/', $entry);
@@ -108,6 +109,7 @@ function validateRelease(string $archive, string $root, string $required): array
         if (!is_file($mainFile)) {
             throw new RuntimeException('Extracted main plugin file was not found.');
         }
+        $header=(string)file_get_contents($mainFile);$requiredHeaders=['Plugin Name'=>'WordPress News Bot','Text Domain'=>'wordpress-news-bot'];if($expectedVersion!=='')$requiredHeaders['Version']=$expectedVersion;if($expectedVersion==='0.4.0-rc.1')$requiredHeaders['Author']='Utkuweb';foreach($requiredHeaders as$name=>$expected){if(!preg_match('/^ \* '.preg_quote($name,'/').':\s*(.+)$/m',$header,$match)||trim($match[1])!==$expected)throw new RuntimeException('Plugin header mismatch: '.$name);}
     } finally {
         removeTree($extractRoot);
     }

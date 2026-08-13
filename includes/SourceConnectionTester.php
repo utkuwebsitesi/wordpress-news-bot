@@ -25,6 +25,12 @@ final class SourceConnectionTester
 
     public function test(string $url, array $allowedDomains): array
     {
+        $result=$this->fetch($url,$allowedDomains);unset($result['items']);return$result;
+    }
+
+    /** @return array{result_code:string,test_id:string,http_status:int,content_type:string,response_bytes:int,feed_type:string,item_count:int,last_item_date:string,duration_ms:int,final_host:string,redirect_hosts:array,items:array} */
+    public function fetch(string $url, array $allowedDomains): array
+    {
         $started = microtime(true);
         $testId = bin2hex(random_bytes(8));
         $diagnostics = ['test_id'=>$testId,'redirect_hosts'=>[],'_started'=>$started];
@@ -57,7 +63,7 @@ final class SourceConnectionTester
             }
             if($status<200||$status>=300)throw new SourceTestException('http_status_invalid',$testId,$diagnostics);
             $contentType=strtolower(trim(explode(';',(string)wp_remote_retrieve_header($response,'content-type'))[0]));$diagnostics['content_type']=$contentType;
-            $body=(string)wp_remote_retrieve_body($response);$diagnostics['response_bytes']=strlen($body);
+            $body=(string)wp_remote_retrieve_body($response);$diagnostics['response_bytes']=strlen($body);if(strlen($body)>=2*1024*1024)throw new SourceTestException('body_too_large',$testId,$diagnostics);
             if($body==='')throw new SourceTestException('body_empty',$testId,$diagnostics);
             libxml_use_internal_errors(true);$xml=simplexml_load_string($body,'SimpleXMLElement',LIBXML_NONET|LIBXML_NOCDATA);$errors=libxml_get_errors();libxml_clear_errors();
             if($xml===false){$diagnostics['parser_error_class']='libxml:'.(int)($errors[0]->code??0);$code=str_contains($contentType,'html')?'content_type_invalid':'xml_invalid';throw new SourceTestException($code,$testId,$diagnostics);}
@@ -66,7 +72,7 @@ final class SourceConnectionTester
             try{$items=(new FeedParser())->parse($body);}catch(\Throwable$e){$diagnostics['parser_error_class']=get_class($e);throw new SourceTestException('xml_invalid',$testId,$diagnostics,$e);}
             $latest='';foreach($items as$item){$date=(string)($item['published_at']??'');if($date!==''&&($latest===''||strtotime($date)>strtotime($latest)))$latest=$date;}
             $diagnostics+=['feed_type'=>$feedType,'duration_ms'=>max(0,(int)round((microtime(true)-$started)*1000)),'final_host'=>$host];
-            return ['result_code'=>'success','test_id'=>$testId,'http_status'=>$status,'content_type'=>$contentType,'response_bytes'=>strlen($body),'feed_type'=>$feedType,'item_count'=>count($items),'last_item_date'=>$latest,'duration_ms'=>$diagnostics['duration_ms'],'final_host'=>$host,'redirect_hosts'=>$diagnostics['redirect_hosts']];
+            return ['result_code'=>'success','test_id'=>$testId,'http_status'=>$status,'content_type'=>$contentType,'response_bytes'=>strlen($body),'feed_type'=>$feedType,'item_count'=>count($items),'last_item_date'=>$latest,'duration_ms'=>$diagnostics['duration_ms'],'final_host'=>$host,'redirect_hosts'=>$diagnostics['redirect_hosts'],'items'=>$items];
         }
         throw new SourceTestException('redirect_blocked',$testId,$diagnostics);
     }
