@@ -300,7 +300,10 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
 
   test("deletes a source only after explicit confirmation and preserves drafts", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
-    await page.getByRole("link", { name: "Delete", exact: true }).click();
+    await page
+      .locator("tr", { hasText: "Fixture Atom edited" })
+      .getByRole("link", { name: "Delete", exact: true })
+      .click();
     await expect(
       page.getByRole("heading", { name: "Delete news source" }),
     ).toBeVisible();
