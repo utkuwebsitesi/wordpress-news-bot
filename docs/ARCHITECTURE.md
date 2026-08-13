@@ -1,6 +1,6 @@
 # Mimari
 
-- `neyelazim-newsbot.php`: WordPress bootstrap ve hook’lar.
+- `neyelazim-newsbot.php`: WordPress bootstrap ve hook’lar. Dosya adı geriye dönük uyumluluk için korunmuştur.
 - `src/Database.php`: dbDelta ile idempotent schema kurulumu.
 - `src/FeedParser.php`: yalnızca verilen RSS/Atom XML’ini, dış ağ çağrısı yapmadan normalize eder.
 - `src/Security.php`: HTTPS, public host ve allowlist kontrolleri.

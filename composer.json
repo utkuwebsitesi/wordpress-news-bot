@@ -1,6 +1,6 @@
 {
-  "name": "utkuwebsitesi/neyelazim-newsbot",
-  "description": "Neyelazım.com WordPress RSS news bot plugin",
+  "name": "utkuwebsitesi/wordpress-news-bot",
+  "description": "Generic WordPress RSS news bot plugin",
   "type": "wordpress-plugin",
   "license": "proprietary",
   "require-dev": {"phpunit/phpunit": "^10.5"},

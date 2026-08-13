@@ -1,6 +1,8 @@
-# Neyelazım NewsBot
+# WordPress News Bot
 
-Neyelazım.com için bağımsız, tema bağımsız ve güvenlik odaklı WordPress haber botu eklentisi.
+Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
+
+> Uyumluluk notu: Mevcut kurulumları bozmamak için iç plugin slug’ı, `nyb_` veritabanı prefix’i ve PHP namespace’i korunmuştur.
 
 ## Phase 1 ve Phase 2
 

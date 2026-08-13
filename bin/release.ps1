@@ -1,10 +1,10 @@
 param([string]$Version = '0.1.0')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$out = Join-Path $root ("neyelazim-newsbot-$Version.zip")
+$out = Join-Path $root ("wordpress-news-bot-$Version.zip")
 if (Test-Path $out) { Remove-Item -LiteralPath $out -Force }
 $stage = Join-Path ([System.IO.Path]::GetTempPath()) ("nyb-release-" + [guid]::NewGuid().ToString('N'))
-$plugin = Join-Path $stage 'neyelazim-newsbot'
+$plugin = Join-Path $stage 'wordpress-news-bot'
 New-Item -ItemType Directory -Path $plugin -Force | Out-Null
 $files = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { $_.FullName -notmatch '\\(vendor|tests|\.git)\\' -and $_.Name -notlike '*.zip' -and $_.Name -notlike '.env*' -and $_.Name -ne '.phpunit.result.cache' -and $_.Name -notin @('.gitignore','composer.json','composer.lock','phpunit.xml.dist') -and $_.FullName -notmatch '\\bin\\' }
 foreach ($file in $files) {

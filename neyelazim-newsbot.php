@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Neyelazım NewsBot
+ * Plugin Name: WordPress News Bot
  * Description: Güvenli RSS/Atom haber havuzu ve editör kontrollü içerik hazırlama altyapısı.
  * Version: 0.2.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
- * Author: Neyelazım
- * Text Domain: neyelazim-newsbot
+ * Author: WordPress News Bot
+ * Text Domain: wordpress-news-bot
  */
 declare(strict_types=1);
 

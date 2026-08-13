@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - WordPress News Bot rebrand
+
+- Eklentinin görünen adı tüm WordPress sitelerinde kullanılacak şekilde `WordPress News Bot` olarak güncellendi.
+- GitHub repository adı `wordpress-news-bot` olarak değiştirildi.
+- Mevcut kurulum uyumluluğu için iç slug, `nyb_` prefix’i ve namespace korunmuştur.
+
 ## 0.1.0 - Phase 1
 
 - Eklenti iskeleti, aktivasyon/deaktivasyon ve güvenli uninstall.

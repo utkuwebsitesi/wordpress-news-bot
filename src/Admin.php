@@ -11,13 +11,13 @@ final class Admin
     }
     public function menu(): void
     {
-        add_menu_page('Neyelazım Bot', 'Neyelazım Bot', 'edit_posts', 'nyb-dashboard', [$this, 'dashboard'], 'dashicons-rss', 26);
+        add_menu_page('WordPress News Bot', 'WordPress News Bot', 'edit_posts', 'nyb-dashboard', [$this, 'dashboard'], 'dashicons-rss', 26);
         $items = [['Genel Bakış','nyb-dashboard',[$this,'dashboard']],['Haber Kaynakları','nyb-sources',[$this,'sources']],['Haber Havuzu','nyb-pool',[$this,'pool']],['İşlem Kuyruğu','nyb-jobs',[$this,'placeholder']],['Oluşturulan Haberler','nyb-generated',[$this,'placeholder']],['Ayarlar','nyb-settings',[$this,'settingsPage']],['Hata Kayıtları','nyb-logs',[$this,'logs']],['Sistem Sağlığı','nyb-health',[$this,'health']]];
         foreach ($items as [$title,$slug,$callback]) add_submenu_page('nyb-dashboard', $title, $title, 'edit_posts', $slug, $callback);
     }
     public function settings(): void { register_setting('nyb_settings_group', 'nyb_settings', ['sanitize_callback' => static fn($v) => is_array($v) ? ['ai_provider' => in_array(($v['ai_provider'] ?? 'mock'), ['mock','openai'], true) ? $v['ai_provider'] : 'mock', 'ai_model' => sanitize_text_field($v['ai_model'] ?? 'gpt-4o-mini'), 'daily_ai_quota' => min(1000, max(0, absint($v['daily_ai_quota'] ?? 25))), 'max_run_items' => min(50, max(1, absint($v['max_run_items'] ?? 5))), 'cron_enabled' => empty($v['cron_enabled']) ? 0 : 1, 'retention_days' => max(1, absint($v['retention_days'] ?? 90))] : []]); }
     private function header(string $title): void { echo '<div class="wrap"><h1>' . esc_html($title) . '</h1>'; }
-    public function dashboard(): void { $this->header('Neyelazım Bot'); echo '<p>RSS kaynaklarını güvenli biçimde haber havuzuna alır ve editör incelemesine hazırlar.</p><p><strong>Phase 1:</strong> Otomatik yayın kapalıdır; gerçek OpenAI çağrısı Phase 2 kapsamındadır.</p></div>'; }
+    public function dashboard(): void { $this->header('WordPress News Bot'); echo '<p>Her WordPress sitesinde kullanılabilecek RSS kaynaklarını güvenli biçimde haber havuzuna alır ve editör incelemesine hazırlar.</p><p><strong>Otomatik yayın kapalıdır:</strong> Üretilen içerikler yalnızca taslak olarak oluşturulur.</p></div>'; }
     public function sources(): void
     {
         global $wpdb; $rows = $wpdb->get_results('SELECT * FROM ' . Support::table('sources') . ' ORDER BY id DESC'); $this->header('Haber Kaynakları');
