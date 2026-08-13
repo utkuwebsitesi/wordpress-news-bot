@@ -2,10 +2,14 @@ const { test, expect } = require("@playwright/test");
 const path = require("path");
 
 async function login(page) {
-  await page.goto("/wp-login.php");
-  await page.getByLabel("Username or Email Address").fill("admin");
-  await page.getByLabel("Password", { exact: true }).fill("admin-password");
-  await page.getByRole("button", { name: "Log In" }).click();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goto("/wp-login.php?reauth=1");
+    await page.getByLabel("Username or Email Address").fill("admin");
+    await page.getByLabel("Password", { exact: true }).fill("admin-password");
+    await page.getByRole("button", { name: "Log In" }).click();
+    await page.waitForLoadState("domcontentloaded");
+    if (page.url().includes("/wp-admin/")) return;
+  }
   await expect(page).toHaveURL(/wp-admin/);
 }
 
