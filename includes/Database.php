@@ -19,7 +19,9 @@ final class Database
         ];
         foreach ($tables as $name => $schema) dbDelta('CREATE TABLE ' . Support::table($name) . ' (' . $schema . ") $charset;");
         update_option('wpnb_schema_version', WPNB_SCHEMA_VERSION, false);
-        add_option('wpnb_settings', ['ai_provider' => 'mock', 'ai_model' => 'gpt-4o-mini', 'daily_ai_quota' => 25, 'max_run_items' => 5, 'cron_enabled' => 0, 'retention_days' => 90], '', false);
+        add_option('wpnb_settings', ['ai_provider'=>'openai','ai_model'=>'gpt-4o-mini','language'=>'tr','tone'=>'professional','min_words'=>300,'max_words'=>700,'show_attribution'=>1,'daily_ai_quota'=>25,'max_run_items'=>5,'cron_enabled'=>0,'retention_days'=>90], '', false);
+        add_option('wpnb_setup_state', SetupState::initial(), '', false);
+        add_option('wpnb_connection_status', ['connected'=>0], '', false);
     }
     public static function deactivate(): void { wp_clear_scheduled_hook('wpnb_poll_sources'); }
 }

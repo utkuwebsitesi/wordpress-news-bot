@@ -16,5 +16,9 @@ final class Security
     private static function isPublicIp(string $ip): bool { return (bool) filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE); }
     public static function canManage(): bool { return current_user_can('manage_options'); }
     public static function canReview(): bool { return current_user_can('manage_options') || current_user_can('edit_posts'); }
-    public static function cleanLogContext(array $context): array { unset($context['api_key'], $context['authorization'], $context['token'], $context['email']); return $context; }
+    public static function cleanLogContext(array $context): array
+    {
+        foreach($context as$key=>$value){$normalized=strtolower((string)$key);if(in_array($normalized,['api_key','authorization','token','email','secret','ciphertext'],true)){unset($context[$key]);continue;}if(is_array($value))$context[$key]=self::cleanLogContext($value);elseif(is_string($value))$context[$key]=preg_replace('/(?:bearer\s+|api[_ -]?key\s*[:=]\s*)\S+/i','[redacted]',$value);}
+        return $context;
+    }
 }

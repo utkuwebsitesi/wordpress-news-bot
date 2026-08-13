@@ -4,9 +4,9 @@ namespace WordPressNewsBot;
 
 final class Credentials
 {
-    public static function openAiKey(): string
+    public static function openAiKey(?SecretStorage $storage = null): string
     {
         if (defined('WPNB_OPENAI_API_KEY') && is_string(WPNB_OPENAI_API_KEY)) return trim(WPNB_OPENAI_API_KEY);
-        return '';
+        return ($storage ?? new SecretStorage())->retrieve();
     }
 }

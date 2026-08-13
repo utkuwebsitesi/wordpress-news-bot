@@ -5,7 +5,7 @@ namespace WordPressNewsBot;
 final class MockAiProvider implements AiProvider
 {
     public function model(): string { return 'mock-turkish-v1'; }
-    public function testConnection(): void {}
+    public function testConnection(): array { return ['success'=>true,'model'=>$this->model(),'duration_ms'=>0,'request_id'=>'mock','http_class'=>2]; }
     public function generate(array $item): array
     {
         $title = trim((string) ($item['title'] ?? 'Yeni gelişme'));

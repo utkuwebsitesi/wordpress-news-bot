@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 - Secure onboarding and credentials
+
+- Yönetim panelinden test edilerek kaydedilen, Sodium/AES-256-GCM şifreli OpenAI API anahtarı yönetimi.
+- Beş adımlı ilk kurulum sihirbazı, bağlantı metadatası ve profesyonel ayar/durum kartları.
+- API anahtarı değiştirme, yeniden test etme ve onaylı silme akışları.
+- WordPress i18n altyapısı, güvenli salt değişimi davranışı ve genişletilmiş credential testleri.
+
 ## 0.2.2 - Cross-platform release packaging
 
 - ZIP entry names are generated with forward slashes on every operating system.

@@ -10,13 +10,15 @@ Global kullanım için plugin slug, namespace, sabitler, option/transient isimle
 
 Bu sürüm RSS/Atom kaynaklarını yönetir, haber havuzuna güvenli ve idempotent biçimde alır, duplicate kontrolü yapar ve yönetim panelinde editör incelemesine sunar. Phase 2’de OpenAI Responses API ile strict JSON Schema çıktısı alınabilir; taslaklar WordPress’te daima `draft` statüsünde oluşturulur. Otomatik yayın yoktur.
 
-OpenAI kullanımı için `wp-config.php` içine `define('WPNB_OPENAI_API_KEY', '...');` ekleyin, ayarlardan sağlayıcıyı OpenAI seçin ve “Bağlantıyı Test Et” düğmesini kullanın. Anahtar repository’ye veya WordPress ayarlarına yazılmaz. Varsayılan sağlayıcı mock, cron kapalı, günlük kota 25 ve çalıştırma başına limit 5’tir.
+OpenAI kullanımı için WordPress yönetim panelinde **WordPress News Bot → Ayarlar → OpenAI Bağlantısı** kartını açın. API anahtarı yalnızca sunucu tarafında test edilir; test başarılı olursa WordPress salt değerlerinden türetilen anahtarla şifrelenerek, autoload kapalı biçimde saklanır. Kaydedilen anahtar tekrar gösterilmez. Varsayılan cron kapalı, günlük kota 25 ve çalıştırma başına limit 5’tir.
+
+İlk etkinleştirmede beş adımlı kurulum sihirbazı OpenAI bağlantısı, içerik ayarları, limitler, ilk RSS kaynağı ve özeti yönlendirir. Sihirbaz atlanabilir ve ayarlar daha sonra tamamlanabilir.
 
 Kurulum için [docs/INSTALLATION.md](docs/INSTALLATION.md), mimari için [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) dosyasına bakın.
 
 ## Güvenlik
 
-Kaynak URL'leri HTTPS ve allowlist ile sınırlandırılır; özel IP, localhost ve yönlendirme hedefleri reddedilir. API anahtarı depolanmaz; Phase 2 sabit/şifreli ayar planı için [SECURITY.md](SECURITY.md) okunmalıdır.
+Kaynak URL'leri HTTPS ve allowlist ile sınırlandırılır; özel IP, localhost ve yönlendirme hedefleri reddedilir. API anahtarı yalnızca başarılı bağlantı testi sonrasında authenticated encryption ile saklanır; ayrıntılar için [SECURITY.md](SECURITY.md) okunmalıdır.
 
 ## Lisans
 

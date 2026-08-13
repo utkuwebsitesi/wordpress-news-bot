@@ -6,6 +6,7 @@ interface AiProvider
 {
     /** @return array<string,mixed> */
     public function generate(array $item): array;
-    public function testConnection(): void;
+    /** @return array{success:bool,model:string,duration_ms:int,request_id:string,http_class:int} */
+    public function testConnection(): array;
     public function model(): string;
 }
