@@ -2,7 +2,7 @@ name: Stabilization gates
 
 on:
   push:
-    branches: [main, stabilization/0.4.0]
+    branches: [main, "stabilization/**"]
   pull_request:
   workflow_dispatch:
 
@@ -189,7 +189,7 @@ jobs:
           {
             WPNB_ARTIFACTS_DIR: "${{ github.workspace }}/dist",
             WPNB_WP_IMAGE: "wordpress:7.0.4-php8.3-apache",
-            WPNB_DB_ENGINE: InnoDB,
+            WPNB_DB_ENGINE: MyISAM,
             WPNB_PROJECT: wpnb-e2e,
           }
       - uses: actions/upload-artifact@v4

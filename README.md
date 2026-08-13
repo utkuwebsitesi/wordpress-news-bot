@@ -2,6 +2,8 @@
 
 Current candidate: `0.4.0-rc.1`
 
+P0 manuel akış: `Kaynak ekle → Haberleri çek → Haber havuzunda incele → AI ile taslak oluştur → WordPress taslağını düzenle`. Kaynak bazlı ve toplu haber çekme işlemleri WP-Cron kapalıyken de aynı güvenli import servisini kullanır; kullanıcının WP-CLI, phpMyAdmin veya sunucu cron'una ihtiyacı yoktur.
+
 Durum: **release candidate**. Production deploy yapılmamıştır; stable `0.4.0` için gerçek pilot onayı beklenmektedir.
 
 Geliştirici: **Utkuweb**

@@ -2,6 +2,9 @@
 
 ## 0.4.0-rc.1 - Stabilization and release candidate gates
 
+- Kaynak satırından veya tüm aktif kaynaklardan POST, nonce, capability, global/kaynak kilidi ve batch korumalı manuel haber çekme eklendi; bu akış WP-Cron kapalıyken de çalışır.
+- Haber Havuzu kaynak/kategori/durum/tarih/arama filtreleri, açıklayıcı boş durum, ön izleme, atlama ve tekli/toplu AI taslak eylemleriyle tamamlandı.
+- Gerçek release ZIP'iyle MyISAM varsayılan WordPress/MariaDB ortamında 20 RSS + 20 Atom kaydı, duplicate tekrarı, kategori ilişkileri, tekli/toplu `draft`, hatalı feed ve hatalı AI veri koruması E2E kabul kapısına eklendi.
 - Gerçek import ile kaynak bağlantı testinin SSRF, DNS, redirect, response-size ve feed doğrulama motoru birleştirildi.
 - Canonical veritabanı şeması INSERT/UPDATE formatlarının tek kaynağı haline getirildi; şema fingerprint'inden değişken satır/byte değerleri çıkarıldı.
 - Taslak üretiminde atomik option kilidi, eşzamanlı kota rezervasyonu, job/generation günlüğü ve kontrollü hata geri alma eklendi.

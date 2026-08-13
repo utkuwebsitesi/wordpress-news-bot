@@ -19,12 +19,14 @@ final class SourceMaintenanceSafetyTest extends TestCase
     public function testAdminProvidesProtectedPostOnlyCrudBulkAndMobileActions(): void
     {
         $source=file_get_contents(dirname(__DIR__).'/admin/Admin.php');
-        foreach(['wpnb_test_source','wpnb_toggle_source','wpnb_delete_source','wpnb_bulk_sources'] as$action)$this->assertStringContainsString($action,$source);
-        foreach(['Test Before Saving','Edit','Activate','Deactivate','Delete','wpnb-sources-table'] as$text)$this->assertStringContainsString($text,$source);
+        foreach(['wpnb_test_source','wpnb_fetch_source','wpnb_fetch_all_sources','wpnb_toggle_source','wpnb_delete_source','wpnb_bulk_sources','wpnb_skip_item'] as$action)$this->assertStringContainsString($action,$source);
+        foreach(['Test Before Saving','Fetch News','Fetch from All Active Sources','Edit','Activate','Deactivate','Delete','wpnb-sources-table','wpnb-pool-table'] as$text)$this->assertStringContainsString($text,$source);
         $this->assertStringContainsString("REQUEST_METHOD",$source);
         $this->assertStringContainsString("!=='POST'",$source);
         $this->assertStringContainsString('check_admin_referer',$source);
         $this->assertStringContainsString('Security::canManage()',$source);
+        $this->assertStringContainsString("requirePostAction('wpnb_fetch_source_",$source);
+        $this->assertStringContainsString("requirePostAction('wpnb_fetch_all_sources')",$source);
         $this->assertStringContainsString("requirePostAction('wpnb_repair_database')",$source);
         $this->assertStringContainsString("'wpnb-health'],true)?'manage_options'",$source);
         $this->assertStringContainsString('confirm(',$source);
@@ -65,7 +67,7 @@ final class SourceMaintenanceSafetyTest extends TestCase
     {
         $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');
         $plugin=file_get_contents(dirname(__DIR__).'/includes/Plugin.php');
-        $this->assertStringContainsString("do_action('wpnb_sources_polled',true)",$admin);
+        $this->assertStringContainsString('new ManualImportService()',$admin);
         $this->assertStringContainsString('importActiveSources(bool $force=false)',$plugin);
         $this->assertStringContainsString("if(!\$force&&\$last!==''",$plugin);
         $this->assertStringContainsString("do_action('wpnb_sources_polled')",$plugin);

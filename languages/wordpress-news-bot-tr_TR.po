@@ -490,3 +490,143 @@ msgid "The recorded schema version does not match."
 msgstr "Kayıtlı şema sürümü uyuşmuyor."
 msgid "Database metadata could not be verified."
 msgstr "Veritabanı metadata bilgileri doğrulanamadı."
+msgid "News fetching completed."
+msgstr "Haber çekme işlemi tamamlandı."
+
+msgid "The pool item was removed. Existing WordPress drafts were preserved."
+msgstr "Havuz kaydı kaldırıldı. Mevcut WordPress taslakları korundu."
+
+msgid "Complete the OpenAI connection before creating a draft."
+msgstr "Taslak oluşturmak için önce OpenAI bağlantısını tamamlayın."
+
+msgid "Open Settings"
+msgstr "Ayarları Aç"
+
+msgid "Edit WordPress Draft"
+msgstr "WordPress Taslağını Düzenle"
+
+msgid "Active sources"
+msgstr "Aktif kaynaklar"
+
+msgid "Pending news"
+msgstr "Bekleyen haberler"
+
+msgid "News fetched today"
+msgstr "Bugün çekilen haberler"
+
+msgid "Created drafts"
+msgstr "Oluşturulan taslaklar"
+
+msgid "Failed operations"
+msgstr "Hatalı işlemler"
+
+msgid "Remaining daily quota"
+msgstr "Kalan günlük kota"
+
+msgid "Fetch News Now"
+msgstr "Haberleri Şimdi Çek"
+
+msgid "Open News Pool"
+msgstr "Haber Havuzunu Aç"
+
+msgid "Start Creating Drafts"
+msgstr "Taslak Oluşturmaya Başla"
+
+msgid "Automatic news fetching is disabled. Manual news fetching is available."
+msgstr "Otomatik haber çekme kapalı. Manuel haber çekme kullanılabilir."
+
+msgid "Fetch from All Active Sources"
+msgstr "Tüm Aktif Kaynaklardan Haberleri Çek"
+
+msgid "The next source batch is ready."
+msgstr "Sonraki kaynak grubu işlenmeye hazır."
+
+msgid "Continue Fetching News"
+msgstr "Haberleri Çekmeye Devam Et"
+
+msgid "Source saved. Fetch news now."
+msgstr "Kaynak kaydedildi. Şimdi haberleri çek."
+
+msgid "Fetch News"
+msgstr "Haberleri Çek"
+
+msgid "Go to News Sources"
+msgstr "Haber Kaynaklarına Git"
+
+msgid "All sources"
+msgstr "Tüm kaynaklar"
+
+msgid "All categories"
+msgstr "Tüm kategoriler"
+
+msgid "All statuses"
+msgstr "Tüm durumlar"
+
+msgid "Filter"
+msgstr "Filtrele"
+
+msgid "No news has been fetched yet."
+msgstr "Henüz haber çekilmedi."
+
+msgid "Source"
+msgstr "Kaynak"
+
+msgid "Source category"
+msgstr "Kaynak kategorisi"
+
+msgid "Publication date"
+msgstr "Yayın tarihi"
+
+msgid "Fetched date"
+msgstr "Alınma tarihi"
+
+msgid "Preview"
+msgstr "Ön İzle"
+
+msgid "View at Source"
+msgstr "Kaynakta Gör"
+
+msgid "Create Drafts from Selected"
+msgstr "Seçilenlerden Taslak Oluştur"
+
+msgid "New"
+msgstr "Yeni"
+
+msgid "Ready for draft"
+msgstr "Taslak oluşturulmaya hazır"
+
+msgid "Processing"
+msgstr "İşleniyor"
+
+msgid "Draft created"
+msgstr "Taslak oluşturuldu"
+
+msgid "Duplicate"
+msgstr "Tekrar"
+
+msgid "Skipped"
+msgstr "Atlandı"
+
+msgid "Remove this pool item? Existing WordPress drafts will be preserved."
+msgstr "Bu havuz kaydı kaldırılsın mı? Mevcut WordPress taslakları korunacak."
+
+msgid "Skip/Delete"
+msgstr "Atla/Sil"
+
+msgid "%1$d drafts created, %2$d failed."
+msgstr "%1$d taslak oluşturuldu, %2$d işlem başarısız oldu."
+
+msgid "%1$s processed: %2$d read, %3$d new, %4$d duplicate, %5$d invalid, %6$d failed, %7$d ms. Operation ID: %8$s"
+msgstr "%1$s kaynağı işlendi: %2$d kayıt okundu, %3$d yeni, %4$d tekrar, %5$d geçersiz, %6$d başarısız, %7$d ms. İşlem Kimliği: %8$s"
+
+msgid "An all-source import is already running."
+msgstr "Tüm kaynakları kapsayan bir haber çekme işlemi zaten çalışıyor."
+
+msgid "%1$d read, %2$d new, %3$d duplicate."
+msgstr "%1$d okundu, %2$d yeni, %3$d tekrar."
+
+msgid "Some feed items could not be saved."
+msgstr "Bazı feed kayıtları kaydedilemedi."
+
+msgid "Operation ID: %s"
+msgstr "İşlem Kimliği: %s"
