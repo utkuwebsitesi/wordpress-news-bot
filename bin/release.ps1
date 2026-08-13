@@ -6,7 +6,7 @@ if (Test-Path $out) { Remove-Item -LiteralPath $out -Force }
 $stage = Join-Path ([System.IO.Path]::GetTempPath()) ("nyb-release-" + [guid]::NewGuid().ToString('N'))
 $plugin = Join-Path $stage 'neyelazim-newsbot'
 New-Item -ItemType Directory -Path $plugin -Force | Out-Null
-$files = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { $_.FullName -notmatch '\\(vendor|tests|\.git)\\' -and $_.Name -notlike '*.zip' -and $_.Name -notlike '.env*' -and $_.Name -ne '.phpunit.result.cache' -and $_.Name -notin @('composer.json','composer.lock','phpunit.xml.dist') -and $_.FullName -notmatch '\\bin\\' }
+$files = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { $_.FullName -notmatch '\\(vendor|tests|\.git)\\' -and $_.Name -notlike '*.zip' -and $_.Name -notlike '.env*' -and $_.Name -ne '.phpunit.result.cache' -and $_.Name -notin @('.gitignore','composer.json','composer.lock','phpunit.xml.dist') -and $_.FullName -notmatch '\\bin\\' }
 foreach ($file in $files) {
     $relative = $file.FullName.Substring($root.Length).TrimStart('\')
     $target = Join-Path $plugin $relative
