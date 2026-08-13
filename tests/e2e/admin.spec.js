@@ -19,7 +19,12 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       .locator("input[type=file]")
       .setInputFiles(path.resolve(process.env.WPNB_ZIP_PATH));
     await page.getByRole("button", { name: /Install Now/i }).click();
-    await page.getByRole("link", { name: /Activate Plugin/i }).click();
+    await expect(page.locator("body")).toContainText(
+      "Plugin installed successfully",
+    );
+    await page
+      .locator('a[href*="action=activate"][href*="plugin=wordpress-news-bot"]')
+      .click();
     await expect(page.locator("#the-list")).toContainText("WordPress News Bot");
     await expect(page.locator("#the-list")).toContainText("Utkuweb");
   });
