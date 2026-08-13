@@ -57,7 +57,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page
       .getByRole("button", { name: "Save and Test Connection" })
       .click();
-    await expect(page.locator(".notice-error")).toBeVisible();
+    await expect(page.locator(".notice-error.is-dismissible")).toBeVisible();
     await expect(page.locator("body")).not.toContainText("invalid-key");
   });
 
@@ -68,7 +68,9 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page
       .getByRole("button", { name: "Save and Test Connection" })
       .click();
-    const connectionNotice = page.locator(".notice-success, .notice-error");
+    const connectionNotice = page.locator(
+      ".notice-success.is-dismissible, .notice-error.is-dismissible",
+    );
     await expect(connectionNotice).toBeVisible();
     expect(await connectionNotice.innerText()).toContain("securely saved");
     await expect(page.locator("body")).not.toContainText("fixture-secret-key");
@@ -81,18 +83,20 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
     expect(browserLeak).not.toContain("fixture-secret-key");
     await page.getByRole("button", { name: "Retest Connection" }).click();
-    await expect(page.locator(".notice-success")).toBeVisible();
+    await expect(page.locator(".notice-success.is-dismissible")).toBeVisible();
     await page.locator("#wpnb-api-key").fill("fixture-secret-key-2");
     await page.getByRole("button", { name: "Change API Key and Test" }).click();
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Delete API Key" }).click();
-    await expect(page.locator(".notice-success")).toContainText("deleted");
+    await expect(page.locator(".notice-success.is-dismissible")).toContainText(
+      "deleted",
+    );
     await page.locator("#wpnb-api-key").fill("fixture-secret-key");
     await page.locator("#wpnb-model").fill("fixture-model");
     await page
       .getByRole("button", { name: "Save and Test Connection" })
       .click();
-    await expect(page.locator(".notice-success")).toBeVisible();
+    await expect(page.locator(".notice-success.is-dismissible")).toBeVisible();
   });
 
   test("tests, saves, lists, edits, toggles, and rejects a duplicate RSS source", async () => {
@@ -100,9 +104,13 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.locator("#wpnb-source-name").fill("Fixture RSS");
     await page.locator("#wpnb-feed-url").fill("https://feed.test/rss.xml");
     await page.getByRole("button", { name: "Test Before Saving" }).click();
-    await expect(page.locator(".notice-success")).toContainText("succeeded");
+    await expect(page.locator(".notice-success.is-dismissible")).toContainText(
+      "succeeded",
+    );
     await page.getByRole("button", { name: "Save Source" }).click();
-    await expect(page.locator(".notice-success")).toContainText("saved");
+    await expect(page.locator(".notice-success.is-dismissible")).toContainText(
+      "saved",
+    );
     await expect(page.locator(".wpnb-sources-table")).toContainText(
       "Fixture RSS",
     );
@@ -118,7 +126,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.locator("#wpnb-source-name").fill("Duplicate fixture");
     await page.locator("#wpnb-feed-url").fill("https://feed.test/rss.xml");
     await page.getByRole("button", { name: "Save Source" }).click();
-    await expect(page.locator(".notice-error")).toContainText(
+    await expect(page.locator(".notice-error.is-dismissible")).toContainText(
       "already registered",
     );
   });
@@ -129,7 +137,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-pool");
     await expect(page.locator("table")).toContainText("Anonymous fixture item");
     await page.getByRole("button", { name: "Create Draft" }).click();
-    await expect(page.locator(".notice-success")).toBeVisible();
+    await expect(page.locator(".notice-success.is-dismissible")).toBeVisible();
     await page.goto("/wp-admin/edit.php?post_status=draft&post_type=post");
     await expect(page.locator("#the-list")).toContainText(
       "Deterministic draft",
@@ -176,7 +184,9 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       page.getByRole("heading", { name: "Delete news source" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Delete" }).click();
-    await expect(page.locator(".notice-success")).toContainText("preserved");
+    await expect(page.locator(".notice-success.is-dismissible")).toContainText(
+      "preserved",
+    );
     await page.goto("/wp-admin/edit.php?post_status=draft&post_type=post");
     await expect(page.locator("#the-list")).toContainText(
       "Deterministic draft",
