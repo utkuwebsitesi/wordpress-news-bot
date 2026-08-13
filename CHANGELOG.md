@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 - Cross-platform release packaging
+
+- ZIP entry names are generated with forward slashes on every operating system.
+- PHP `ZipArchive` now validates every entry, the single plugin root, the main plugin file, and extracted layout.
+- Release creation uses a clean temporary staging directory and production-only Composer dependencies.
+
 ## 0.2.1 - Global identity cleanup
 
 - Eklenti kimlikleri tamamen `WordPress News Bot`, `wordpress-news-bot`, `WordPressNewsBot`, `wpnb_` ve `WPNB_` olarak yeniden adlandırıldı.

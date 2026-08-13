@@ -1,5 +1,7 @@
 # WordPress News Bot
 
+Current release: `0.2.2`
+
 Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
 
 Global kullanım için plugin slug, namespace, sabitler, option/transient isimleri ve veritabanı tabloları `wordpress-news-bot`, `WordPressNewsBot`, `WPNB_` ve `wpnb_` kimliklerini kullanır.
