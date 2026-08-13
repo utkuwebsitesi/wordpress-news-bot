@@ -12,5 +12,5 @@ if (!function_exists('wp_kses')) { function wp_kses(string $v, array $allowed): 
 if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_retrieve_response_code(array $r): int { return (int)($r['response']['code'] ?? 200); } }
 if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body(array $r): string { return (string)($r['body'] ?? ''); } }
 if (!function_exists('is_wp_error')) { function is_wp_error(mixed $v): bool { return false; } }
-require dirname(__DIR__) . '/src/FeedParser.php'; require dirname(__DIR__) . '/src/Security.php'; require dirname(__DIR__) . '/src/Support.php';
-require dirname(__DIR__) . '/src/AiProvider.php'; require dirname(__DIR__) . '/src/MockAiProvider.php'; require dirname(__DIR__) . '/src/ContentSanitizer.php'; require dirname(__DIR__) . '/src/AiResponseValidator.php'; require dirname(__DIR__) . '/src/OpenAiProvider.php'; require dirname(__DIR__) . '/src/DraftPolicy.php';
+require dirname(__DIR__) . '/includes/FeedParser.php'; require dirname(__DIR__) . '/includes/Security.php'; require dirname(__DIR__) . '/includes/Support.php';
+require dirname(__DIR__) . '/includes/AiProvider.php'; require dirname(__DIR__) . '/includes/MockAiProvider.php'; require dirname(__DIR__) . '/includes/ContentSanitizer.php'; require dirname(__DIR__) . '/includes/AiResponseValidator.php'; require dirname(__DIR__) . '/includes/OpenAiProvider.php'; require dirname(__DIR__) . '/includes/DraftPolicy.php';

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Neyelazim\NewsBot;
+namespace WordPressNewsBot;
 
 final class Database
 {
@@ -18,8 +18,8 @@ final class Database
             'daily_usage' => "id bigint(20) unsigned NOT NULL AUTO_INCREMENT, usage_date date NOT NULL, ai_requests int unsigned NOT NULL DEFAULT 0, input_tokens int unsigned NOT NULL DEFAULT 0, output_tokens int unsigned NOT NULL DEFAULT 0, estimated_cost decimal(12,6) NOT NULL DEFAULT 0, PRIMARY KEY (id), UNIQUE KEY usage_date (usage_date)"
         ];
         foreach ($tables as $name => $schema) dbDelta('CREATE TABLE ' . Support::table($name) . ' (' . $schema . ") $charset;");
-        update_option('nyb_schema_version', NYB_SCHEMA_VERSION, false);
-        add_option('nyb_settings', ['ai_provider' => 'mock', 'ai_model' => 'gpt-4o-mini', 'daily_ai_quota' => 25, 'max_run_items' => 5, 'cron_enabled' => 0, 'retention_days' => 90], '', false);
+        update_option('wpnb_schema_version', WPNB_SCHEMA_VERSION, false);
+        add_option('wpnb_settings', ['ai_provider' => 'mock', 'ai_model' => 'gpt-4o-mini', 'daily_ai_quota' => 25, 'max_run_items' => 5, 'cron_enabled' => 0, 'retention_days' => 90], '', false);
     }
-    public static function deactivate(): void { wp_clear_scheduled_hook('nyb_poll_sources'); }
+    public static function deactivate(): void { wp_clear_scheduled_hook('wpnb_poll_sources'); }
 }

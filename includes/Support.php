@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-namespace Neyelazim\NewsBot;
+namespace WordPressNewsBot;
 
 final class Support
 {
-    public static function table(string $name): string { global $wpdb; return $wpdb->prefix . 'nyb_' . $name; }
+    public static function table(string $name): string { global $wpdb; return $wpdb->prefix . 'wpnb_' . $name; }
     public static function now(): string { return gmdate('Y-m-d H:i:s'); }
     public static function json(mixed $value): string { return (string) wp_json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); }
     public static function normalizeUrl(string $url): string

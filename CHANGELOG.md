@@ -1,10 +1,15 @@
 # Changelog
 
+## 0.2.1 - Global identity cleanup
+
+- Eklenti kimlikleri tamamen `WordPress News Bot`, `wordpress-news-bot`, `WordPressNewsBot`, `wpnb_` ve `WPNB_` olarak yeniden adlandırıldı.
+- Üretim ZIP yapısı düzeltildi; ana plugin dosyası `wordpress-news-bot/wordpress-news-bot.php` konumundadır.
+
 ## 0.2.1 - WordPress News Bot rebrand
 
 - Eklentinin görünen adı tüm WordPress sitelerinde kullanılacak şekilde `WordPress News Bot` olarak güncellendi.
 - GitHub repository adı `wordpress-news-bot` olarak değiştirildi.
-- Mevcut kurulum uyumluluğu için iç slug, `nyb_` prefix’i ve namespace korunmuştur.
+- Mevcut kurulum uyumluluğu için iç slug, `wpnb_` prefix’i ve namespace korunmuştur.
 
 ## 0.1.0 - Phase 1
 
