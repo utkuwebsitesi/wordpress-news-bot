@@ -10,9 +10,19 @@ async function login(page) {
 }
 
 test.describe.serial("WordPress News Bot admin lifecycle", () => {
-  test("uploads the real ZIP, activates it, and shows Utkuweb metadata", async ({
-    page,
-  }) => {
+  let context;
+  let page;
+
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext();
+    page = await context.newPage();
+  });
+
+  test.afterAll(async () => {
+    await context.close();
+  });
+
+  test("uploads the real ZIP, activates it, and shows Utkuweb metadata", async () => {
     await login(page);
     await page.goto("/wp-admin/plugin-install.php?tab=upload");
     await page
@@ -29,10 +39,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator("#the-list")).toContainText("Utkuweb");
   });
 
-  test("supports setup skip, reopen, and completion without losing settings", async ({
-    page,
-  }) => {
-    await login(page);
+  test("supports setup skip, reopen, and completion without losing settings", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-setup");
     await expect(
       page.getByRole("heading", { name: "Setup Wizard" }),
@@ -43,8 +50,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page).toHaveURL(/wpnb-dashboard/);
   });
 
-  test("rejects a failed OpenAI key and never renders it", async ({ page }) => {
-    await login(page);
+  test("rejects a failed OpenAI key and never renders it", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-settings");
     await page.locator("#wpnb-api-key").fill("invalid-key");
     await page.locator("#wpnb-model").fill("fixture-model");
@@ -55,10 +61,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator("body")).not.toContainText("invalid-key");
   });
 
-  test("saves, retests, changes, and deletes an encrypted OpenAI key without exposure", async ({
-    page,
-  }) => {
-    await login(page);
+  test("saves, retests, changes, and deletes an encrypted OpenAI key without exposure", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-settings");
     await page.locator("#wpnb-api-key").fill("fixture-secret-key");
     await page.locator("#wpnb-model").fill("fixture-model");
@@ -92,10 +95,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator(".notice-success")).toBeVisible();
   });
 
-  test("tests, saves, lists, edits, toggles, and rejects a duplicate RSS source", async ({
-    page,
-  }) => {
-    await login(page);
+  test("tests, saves, lists, edits, toggles, and rejects a duplicate RSS source", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
     await page.locator("#wpnb-source-name").fill("Fixture RSS");
     await page.locator("#wpnb-feed-url").fill("https://feed.test/rss.xml");
@@ -123,10 +123,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
   });
 
-  test("imports the fixture, creates only one safe draft, and enforces duplicate protection", async ({
-    page,
-  }) => {
-    await login(page);
+  test("imports the fixture, creates only one safe draft, and enforces duplicate protection", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-settings");
     await page.getByRole("button", { name: "Run Manually" }).click();
     await page.goto("/wp-admin/admin.php?page=wpnb-pool");
@@ -139,14 +136,11 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
   });
 
-  test("renders all admin pages at desktop and mobile widths without console errors", async ({
-    page,
-  }) => {
+  test("renders all admin pages at desktop and mobile widths without console errors", async () => {
     const errors = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") errors.push(msg.text());
     });
-    await login(page);
     for (const slug of [
       "wpnb-dashboard",
       "wpnb-setup",
@@ -164,10 +158,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(errors).toEqual([]);
   });
 
-  test("deactivates and reactivates while preserving plugin data", async ({
-    page,
-  }) => {
-    await login(page);
+  test("deactivates and reactivates while preserving plugin data", async () => {
     await page.goto("/wp-admin/plugins.php");
     const row = page.locator('tr[data-slug="wordpress-news-bot"]');
     await row.getByRole("link", { name: "Deactivate" }).click();
@@ -178,10 +169,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
   });
 
-  test("deletes a source only after explicit confirmation and preserves drafts", async ({
-    page,
-  }) => {
-    await login(page);
+  test("deletes a source only after explicit confirmation and preserves drafts", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
     await page.getByRole("link", { name: "Delete" }).click();
     await expect(
