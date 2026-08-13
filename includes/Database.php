@@ -9,7 +9,8 @@ final class Database
         global $wpdb;
         try {
             $result=(new DatabaseRepair($wpdb))->run(true);
-            if($result['status']!=='healthy')update_option('wpnb_source_recovery_required',['reason'=>'database_repair_required','detected_at'=>Support::now(),'schema_fingerprint'=>$result['after']],false);
+            if($result['status']==='healthy')update_option('wpnb_plugin_version',WPNB_VERSION,false);
+            else update_option('wpnb_source_recovery_required',['reason'=>'database_repair_required','detected_at'=>Support::now(),'schema_fingerprint'=>$result['after']],false);
         } catch (\Throwable $e) {
             update_option('wpnb_source_recovery_required', ['reason'=>'database_repair_failed','detected_at'=>Support::now(),'error_class'=>get_class($e)], false);
         }
