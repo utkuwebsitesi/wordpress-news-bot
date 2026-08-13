@@ -27,10 +27,13 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $this->assertStringContainsString('START TRANSACTION',$migration);
         $this->assertStringContainsString('COMMIT',$migration);
         $this->assertStringContainsString('ROLLBACK',$migration);
-        $this->assertStringContainsString('UPDATE $jobsTable SET feed_item_id',$migration);
-        $this->assertStringContainsString('UPDATE $generationsTable SET feed_item_id',$migration);
+        $this->assertStringContainsString('moveRelations($jobsTable',$migration);
+        $this->assertStringContainsString('moveRelations($generationsTable',$migration);
         $this->assertStringContainsString('source_duplicate_migration',$migration);
         $this->assertStringNotContainsString('wp_posts',$migration);
+        $this->assertStringContainsString("update_option('wpnb_schema_version', WPNB_SCHEMA_VERSION",$database);
+        $this->assertStringContainsString('catch (SourceRecoveryRequired',$database);
+        $this->assertLessThan(strpos($database,"update_option('wpnb_schema_version'"),strpos($database,'->run($previousVersion)'));
     }
 
     public function testInactiveSourcesAreExcludedFromCronAndImporter(): void
@@ -39,5 +42,15 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $importer=file_get_contents(dirname(__DIR__).'/includes/SourceImporter.php');
         $this->assertStringContainsString('WHERE active=1',$plugin);
         $this->assertStringContainsString("!(int)\$source['active']",$importer);
+    }
+
+    public function testAdminDoesNotRenderRawSourceExceptions(): void
+    {
+        $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');
+        $this->assertStringNotContainsString('storeAdminNotice($e->getMessage())',$admin);
+        $this->assertStringNotContainsString("'last_error'=>sanitize_text_field(\$e->getMessage())",$admin);
+        $this->assertStringContainsString("__('The previous source migration did not complete.",$admin);
+        $plugin=file_get_contents(dirname(__DIR__).'/includes/Plugin.php');
+        $this->assertStringNotContainsString("'last_error'=>sanitize_text_field(\$e->getMessage())",$plugin);
     }
 }

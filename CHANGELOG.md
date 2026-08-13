@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.2 - Source migration recovery
+
+- Migration öncesi kaynak, havuz, kuyruk ve AI ilişki snapshot'ı tutan migration journal.
+- Primary key ana kaynak doğrulaması, affected-row kontrolleri, rollback ve otomatik snapshot geri yükleme.
+- Yalnızca başarılı migration sonrasında schema version güncellemesi ve unique index doğrulaması.
+- Yarım kalmış journal'dan otomatik toparlanma; snapshot bulunmayan boş 0.3.1 kurulumu için açık yönetici uyarısı.
+- RSS URL'sinden otomatik host çıkarma, güvenli alt alan eşleşmesi ve suffix saldırısı koruması.
+- Kullanıcıya ham exception göstermeyen Türkçe kaynak hata akışı.
+
 ## 0.3.1 - News source maintenance
 
 - Source connection test, edit, active/inactive, confirmed delete, and bulk action flows.

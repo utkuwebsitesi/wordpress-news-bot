@@ -144,12 +144,14 @@ final class SourceService
     {
         $name = sanitize_text_field((string) ($input['name'] ?? ''));
         $url = SourceUrl::canonicalize(esc_url_raw((string) ($input['feed_url'] ?? '')));
+        $parts = wp_parse_url($url);
+        $primaryHost = SourceUrl::normalizeHost((string) ($parts['host'] ?? ''));
         $domains = preg_split('/[\r\n,]+/', (string) ($input['allowed_domains'] ?? '')) ?: [];
         $domains = array_values(array_unique(array_filter(array_map([SourceUrl::class, 'normalizeHost'], array_map('trim', $domains)))));
-        if (!$domains) {
-            $parts = wp_parse_url($url);
-            $domains = [SourceUrl::normalizeHost((string) ($parts['host'] ?? ''))];
-        }
+        array_unshift($domains, $primaryHost);
+        $wwwParent = str_starts_with($primaryHost, 'www.') ? substr($primaryHost, 4) : '';
+        if ($wwwParent !== '' && count(explode('.', $wwwParent)) >= 3) $domains[] = $wwwParent;
+        $domains = array_values(array_unique(array_filter($domains)));
         if ($name === '' || !Security::validateFeedUrl($url, $domains)) {
             throw new \InvalidArgumentException(__('The source details did not pass security validation.', 'wordpress-news-bot'));
         }
