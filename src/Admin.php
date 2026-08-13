@@ -1,0 +1,41 @@
+<?php
+declare(strict_types=1);
+namespace Neyelazim\NewsBot;
+
+final class Admin
+{
+    public function register(): void
+    {
+        add_action('admin_menu', [$this, 'menu']); add_action('admin_init', [$this, 'settings']);
+        add_action('admin_post_nyb_save_source', [$this, 'saveSource']); add_action('admin_post_nyb_delete_source', [$this, 'deleteSource']);
+    }
+    public function menu(): void
+    {
+        add_menu_page('Neyelazım Bot', 'Neyelazım Bot', 'edit_posts', 'nyb-dashboard', [$this, 'dashboard'], 'dashicons-rss', 26);
+        $items = [['Genel Bakış','nyb-dashboard',[$this,'dashboard']],['Haber Kaynakları','nyb-sources',[$this,'sources']],['Haber Havuzu','nyb-pool',[$this,'pool']],['İşlem Kuyruğu','nyb-jobs',[$this,'placeholder']],['Oluşturulan Haberler','nyb-generated',[$this,'placeholder']],['Ayarlar','nyb-settings',[$this,'settingsPage']],['Hata Kayıtları','nyb-logs',[$this,'logs']],['Sistem Sağlığı','nyb-health',[$this,'health']]];
+        foreach ($items as [$title,$slug,$callback]) add_submenu_page('nyb-dashboard', $title, $title, 'edit_posts', $slug, $callback);
+    }
+    public function settings(): void { register_setting('nyb_settings_group', 'nyb_settings', ['sanitize_callback' => static fn($v) => is_array($v) ? ['ai_provider' => sanitize_key($v['ai_provider'] ?? 'mock'), 'ai_model' => sanitize_text_field($v['ai_model'] ?? 'mock-turkish-v1'), 'daily_ai_quota' => max(0, absint($v['daily_ai_quota'] ?? 100)), 'retention_days' => max(1, absint($v['retention_days'] ?? 90))] : []]); }
+    private function header(string $title): void { echo '<div class="wrap"><h1>' . esc_html($title) . '</h1>'; }
+    public function dashboard(): void { $this->header('Neyelazım Bot'); echo '<p>RSS kaynaklarını güvenli biçimde haber havuzuna alır ve editör incelemesine hazırlar.</p><p><strong>Phase 1:</strong> Otomatik yayın kapalıdır; gerçek OpenAI çağrısı Phase 2 kapsamındadır.</p></div>'; }
+    public function sources(): void
+    {
+        global $wpdb; $rows = $wpdb->get_results('SELECT * FROM ' . Support::table('sources') . ' ORDER BY id DESC'); $this->header('Haber Kaynakları');
+        echo '<p>Yalnızca HTTPS RSS/Atom ve allowlist kapsamındaki kaynakları ekleyin.</p><table class="widefat"><thead><tr><th>Ad</th><th>URL</th><th>Durum</th><th>Kategori</th><th>Son başarı</th></tr></thead><tbody>';
+        foreach ($rows as $row) echo '<tr><td>' . esc_html($row->name) . '</td><td>' . esc_html($row->feed_url) . '</td><td>' . ($row->active ? 'Aktif' : 'Pasif') . '</td><td>' . esc_html((string) $row->category_id) . '</td><td>' . esc_html((string) $row->last_success) . '</td></tr>';
+        echo '</tbody></table><h2>Kaynak ekle</h2><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'; wp_nonce_field('nyb_save_source'); echo '<input type="hidden" name="action" value="nyb_save_source"><table class="form-table"><tr><th><label for="nyb-name">Kaynak adı</label></th><td><input id="nyb-name" required name="name" class="regular-text"></td></tr><tr><th><label for="nyb-url">RSS/Atom HTTPS URL</label></th><td><input id="nyb-url" required type="url" name="feed_url" class="regular-text"></td></tr><tr><th>Günlük kota</th><td><input type="number" min="1" name="daily_quota" value="10"></td></tr></table><p><button class="button button-primary">Kaydet</button></p></form></div>';
+    }
+    public function saveSource(): void
+    {
+        if (!Security::canManage() || !check_admin_referer('nyb_save_source')) wp_die('Yetkiniz yok.'); global $wpdb;
+        $url = esc_url_raw(wp_unslash($_POST['feed_url'] ?? '')); if (!Security::validateFeedUrl($url)) wp_die('Kaynak HTTPS olmalı ve güvenlik doğrulamasından geçmelidir.');
+        $now = Support::now(); $wpdb->insert(Support::table('sources'), ['name' => sanitize_text_field(wp_unslash($_POST['name'] ?? '')), 'feed_url' => $url, 'daily_quota' => max(1, absint($_POST['daily_quota'] ?? 10)), 'created_at' => $now, 'updated_at' => $now], ['%s','%s','%d','%s','%s']); wp_safe_redirect(admin_url('admin.php?page=nyb-sources')); exit;
+    }
+    public function deleteSource(): void { if (!Security::canManage() || !check_admin_referer('nyb_delete_source')) wp_die('Yetkiniz yok.'); }
+    public function pool(): void { global $wpdb; $rows = $wpdb->get_results('SELECT id,title,source_url,status,created_at FROM ' . Support::table('feed_items') . ' ORDER BY id DESC LIMIT 100'); $this->header('Haber Havuzu'); echo '<table class="widefat"><thead><tr><th>Başlık</th><th>Kaynak</th><th>Durum</th><th>Tarih</th></tr></thead><tbody>'; foreach ($rows as $row) echo '<tr><td>' . esc_html($row->title) . '</td><td><a target="_blank" rel="noopener" href="' . esc_url($row->source_url) . '">Kaynağı aç</a></td><td>' . esc_html($row->status) . '</td><td>' . esc_html($row->created_at) . '</td></tr>'; echo '</tbody></table></div>'; }
+    public function health(): void { $this->header('Sistem Sağlığı'); echo '<ul><li>WordPress sürümü: ' . esc_html(get_bloginfo('version')) . '</li><li>PHP: ' . esc_html(PHP_VERSION) . '</li><li>WP-Cron: ' . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON ? 'Devre dışı; cPanel cron önerilir.' : 'Aktif; düşük trafikte gecikebilir.') . '</li><li>Schema: ' . esc_html((string) get_option('nyb_schema_version', 'kurulmamış')) . '</li></ul></div>'; }
+    public function settingsPage(): void { if (!Security::canManage()) wp_die('Yetkiniz yok.'); $s = get_option('nyb_settings', []); $this->header('Ayarlar'); echo '<form method="post" action="options.php">'; settings_fields('nyb_settings_group'); echo '<table class="form-table"><tr><th>AI sağlayıcısı</th><td><input readonly value="mock"></td></tr><tr><th>Model</th><td><input name="nyb_settings[ai_model]" value="' . esc_attr($s['ai_model'] ?? 'mock-turkish-v1') . '"></td></tr><tr><th>Günlük AI kotası</th><td><input type="number" name="nyb_settings[daily_ai_quota]" value="' . esc_attr((string) ($s['daily_ai_quota'] ?? 100)) . '"></td></tr></table>'; submit_button('Ayarları kaydet'); echo '</form></div>'; }
+    public function logs(): void { $this->header('Hata Kayıtları'); echo '<p>Secretsiz loglama Phase 2 provider entegrasyonuyla genişletilecektir.</p></div>'; }
+    public function jobs(): void { $this->placeholder(); }
+    public function placeholder(): void { $this->header('Bu ekran Phase 1 altyapısında hazır'); echo '<p>İşlem kuyruğu ve taslak üretim akışı Phase 2’de tamamlanacaktır.</p></div>'; }
+}

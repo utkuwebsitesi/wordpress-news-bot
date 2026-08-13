@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+vendor/
+node_modules/
+*.log
+*.zip
+.phpunit.result.cache
+coverage/
+/.phpunit.cache/
+/.idea/
+/.vscode/
+Thumbs.db
