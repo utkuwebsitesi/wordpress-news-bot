@@ -76,7 +76,7 @@ services:
       - ${WPNB_ARTIFACTS_DIR:?Set WPNB_ARTIFACTS_DIR}:/artifacts:ro
       - ../integration:/integration:ro
     ports: ["${WPNB_HTTP_PORT:-8080}:80"]
-    networks: [wpnb_net]
+    networks: [default, wpnb_net]
 volumes: { wordpress: {}, certs: {} }
 networks:
   wpnb_net:
