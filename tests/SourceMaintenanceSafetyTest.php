@@ -6,6 +6,16 @@ use PHPUnit\Framework\TestCase;
 
 final class SourceMaintenanceSafetyTest extends TestCase
 {
+    public function testPluginAndPackageMetadataUseUtkuwebAsAuthor():void
+    {
+        $plugin=file_get_contents(dirname(__DIR__).'/wordpress-news-bot.php');
+        $this->assertStringContainsString('Plugin Name: WordPress News Bot',$plugin);
+        $this->assertStringContainsString('Author: Utkuweb',$plugin);
+        $this->assertStringNotContainsString('Author URI:',$plugin);
+        $composer=json_decode((string)file_get_contents(dirname(__DIR__).'/composer.json'),true,512,JSON_THROW_ON_ERROR);
+        $this->assertSame('Utkuweb',$composer['authors'][0]['name']??null);
+    }
+
     public function testAdminProvidesProtectedPostOnlyCrudBulkAndMobileActions(): void
     {
         $source=file_get_contents(dirname(__DIR__).'/admin/Admin.php');

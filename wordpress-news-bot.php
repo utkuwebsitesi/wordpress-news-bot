@@ -5,7 +5,7 @@
  * Version: 0.3.3
  * Requires at least: 6.4
  * Requires PHP: 8.1
- * Author: WordPress News Bot
+ * Author: Utkuweb
  * Text Domain: wordpress-news-bot
  */
 declare(strict_types=1);

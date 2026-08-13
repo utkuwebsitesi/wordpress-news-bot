@@ -3,6 +3,11 @@
   "description": "Generic WordPress RSS news bot plugin",
   "type": "wordpress-plugin",
   "license": "proprietary",
+  "authors": [
+    {
+      "name": "Utkuweb"
+    }
+  ],
   "require-dev": {"phpunit/phpunit": "^10.5"},
   "autoload": {"psr-4": {"WordPressNewsBot\\": "includes/"}},
   "autoload-dev": {"psr-4": {"WordPressNewsBot\\Tests\\": "tests/"}},

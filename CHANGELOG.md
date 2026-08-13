@@ -2,6 +2,7 @@
 
 ## 0.3.3 - RSS diagnostics and form recovery
 
+- Eklenti geliştirici/yazar bilgisi kalıcı olarak `Utkuweb` şeklinde tanımlandı.
 - URL'den veritabanına kadar aşama bazlı, secretsız sonuç kodları ve destek Test Kimliği.
 - WordPress HTTP API için sade User-Agent, geniş XML Accept header'ı, sınırlı redirect ve her hedefte DNS/IP SSRF doğrulaması.
 - RSS 2.0, RSS 1.0/RDF, Atom, charset içeren XML Content-Type ve geçerli XML body fallback desteği.

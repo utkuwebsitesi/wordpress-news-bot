@@ -2,6 +2,8 @@
 
 Current release: `0.3.3`
 
+Geliştirici: **Utkuweb**
+
 0.3.1 sürümü Haber Kaynakları ekranına kaydetmeden önce bağlantı testi, düzenleme, aktif/pasif durumu, onaylı silme ve toplu işlemler ekler. Canonical URL SHA-256 benzersizliği eşzamanlı isteklerde dahi duplicate feed kaydını engeller; şema yükseltmesi mevcut duplicate kaynakları güvenli biçimde birleştirip ilişkili kayıtları ana kaynağa taşır.
 
 0.3.2 migration işlemi öncesinde kaynaklar ve ilişkili havuz/kuyruk kayıtları için güvenli bir journal snapshot'ı oluşturur. Satır sayısı veya ilişki taşıma doğrulaması başarısızsa rollback ve snapshot geri yükleme uygulanır; schema sürümü yalnızca başarıdan sonra yükseltilir. 0.3.1 sonrasında kaynak tablosu boş ve kurtarılabilir snapshot yoksa yönetici açıkça uyarılır ve uydurma kaynak oluşturulmaz. Ana izin verilen host RSS URL'sinden otomatik çıkarılır; güvenli gerçek alt alan eşleşmesi desteklenir.
