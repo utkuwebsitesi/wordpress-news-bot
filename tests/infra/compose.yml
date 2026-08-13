@@ -7,8 +7,8 @@ services:
       test -f /certs/ca.crt ||
       (openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj /CN=WPNB-Test-CA -keyout /certs/ca.key -out /certs/ca.crt &&
       openssl req -newkey rsa:2048 -nodes -subj /CN=feed.test -keyout /certs/server.key -out /certs/server.csr &&
-      printf 'subjectAltName=DNS:feed.test,DNS:www.feed.test,DNS:openai.test\n' >/certs/ext.cnf &&
-      openssl x509 -req -in /certs/server.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -days 2 -extfile /certs/ext.cnf -out /certs/server.crt)"
+      printf '[server_names]\nsubjectAltName=DNS:feed.test,DNS:www.feed.test,DNS:openai.test\n' >/certs/ext.cnf &&
+      openssl x509 -req -in /certs/server.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -days 2 -extfile /certs/ext.cnf -extensions server_names -out /certs/server.crt)"
   db:
     image: mariadb:10.11
     command:
