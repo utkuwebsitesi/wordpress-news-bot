@@ -65,9 +65,9 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page
       .getByRole("button", { name: "Save and Test Connection" })
       .click();
-    await expect(page.locator(".notice-success")).toContainText(
-      "securely saved",
-    );
+    const connectionNotice = page.locator(".notice-success, .notice-error");
+    await expect(connectionNotice).toBeVisible();
+    expect(await connectionNotice.innerText()).toContain("securely saved");
     await expect(page.locator("body")).not.toContainText("fixture-secret-key");
     const browserLeak = await page.evaluate(() =>
       JSON.stringify({
