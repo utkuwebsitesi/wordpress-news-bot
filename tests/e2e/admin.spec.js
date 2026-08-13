@@ -14,7 +14,7 @@ async function login(page) {
 }
 
 async function state(page) {
-  const response = await page.request.get("/wp-json/wpnb-test/v1/state", {
+  const response = await page.request.get("/?rest_route=/wpnb-test/v1/state", {
     headers: { "x-wpnb-test": "1" },
   });
   expect(response.ok()).toBeTruthy();
@@ -236,7 +236,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     db = await state(page);
     expect(db.drafts).toBe(3);
     expect(new Set(db.draft_feed_ids).size).toBe(3);
-    await page.request.post("/wp-json/wpnb-test/v1/invalid-ai", {
+    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
       headers: { "x-wpnb-test": "1" },
       data: { enabled: true },
     });
@@ -246,7 +246,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     db = await state(page);
     expect(db.feed_items).toBe(40);
     expect(db.drafts).toBe(3);
-    await page.request.post("/wp-json/wpnb-test/v1/invalid-ai", {
+    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
       headers: { "x-wpnb-test": "1" },
       data: { enabled: false },
     });
