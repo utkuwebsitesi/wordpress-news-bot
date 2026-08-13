@@ -61,6 +61,16 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $this->assertStringContainsString("!(int)\$source['active']",$importer);
     }
 
+    public function testManualRunBypassesOnlyTheScheduleInterval():void
+    {
+        $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');
+        $plugin=file_get_contents(dirname(__DIR__).'/includes/Plugin.php');
+        $this->assertStringContainsString("do_action('wpnb_sources_polled',true)",$admin);
+        $this->assertStringContainsString('importActiveSources(bool $force=false)',$plugin);
+        $this->assertStringContainsString("if(!\$force&&\$last!==''",$plugin);
+        $this->assertStringContainsString("do_action('wpnb_sources_polled')",$plugin);
+    }
+
     public function testAdminDoesNotRenderRawSourceExceptions(): void
     {
         $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');
