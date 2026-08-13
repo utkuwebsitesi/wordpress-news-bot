@@ -19,7 +19,7 @@ final class Database
         ];
         foreach ($tables as $name => $schema) dbDelta('CREATE TABLE ' . Support::table($name) . ' (' . $schema . ") $charset;");
         update_option('nyb_schema_version', NYB_SCHEMA_VERSION, false);
-        add_option('nyb_settings', ['ai_provider' => 'mock', 'ai_model' => 'mock-turkish-v1', 'daily_ai_quota' => 100, 'retention_days' => 90], '', false);
+        add_option('nyb_settings', ['ai_provider' => 'mock', 'ai_model' => 'gpt-4o-mini', 'daily_ai_quota' => 25, 'max_run_items' => 5, 'cron_enabled' => 0, 'retention_days' => 90], '', false);
     }
     public static function deactivate(): void { wp_clear_scheduled_hook('nyb_poll_sources'); }
 }

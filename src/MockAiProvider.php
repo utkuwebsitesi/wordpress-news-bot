@@ -2,8 +2,10 @@
 declare(strict_types=1);
 namespace Neyelazim\NewsBot;
 
-final class MockAiProvider
+final class MockAiProvider implements AiProvider
 {
+    public function model(): string { return 'mock-turkish-v1'; }
+    public function testConnection(): void {}
     public function generate(array $item): array
     {
         $title = trim((string) ($item['title'] ?? 'Yeni gelişme'));

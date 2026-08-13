@@ -4,5 +4,13 @@ if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags(string $
 if (!function_exists('wp_trim_words')) { function wp_trim_words(string $v, int $n): string { return implode(' ', array_slice(preg_split('/\s+/', trim($v)) ?: [], 0, $n)); } }
 if (!function_exists('esc_url_raw')) { function esc_url_raw(string $v): string { return trim($v); } }
 if (!function_exists('wp_parse_url')) { function wp_parse_url(string $v): array|false { return parse_url($v); } }
+if (!function_exists('wp_json_encode')) { function wp_json_encode(mixed $v, int $flags=0): string|false { return json_encode($v,$flags); } }
 if (!function_exists('sanitize_title')) { function sanitize_title(string $v): string { return strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', iconv('UTF-8','ASCII//TRANSLIT',$v) ?: $v), '-')); } }
-require dirname(__DIR__) . '/src/FeedParser.php'; require dirname(__DIR__) . '/src/Security.php'; require dirname(__DIR__) . '/src/MockAiProvider.php'; require dirname(__DIR__) . '/src/Support.php';
+if (!function_exists('sanitize_text_field')) { function sanitize_text_field(string $v): string { return trim(strip_tags($v)); } }
+if (!function_exists('sanitize_textarea_field')) { function sanitize_textarea_field(string $v): string { return trim(strip_tags($v)); } }
+if (!function_exists('wp_kses')) { function wp_kses(string $v, array $allowed): string { return strip_tags($v, '<p><br><strong><em><ul><ol><li><blockquote><a>'); } }
+if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_retrieve_response_code(array $r): int { return (int)($r['response']['code'] ?? 200); } }
+if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body(array $r): string { return (string)($r['body'] ?? ''); } }
+if (!function_exists('is_wp_error')) { function is_wp_error(mixed $v): bool { return false; } }
+require dirname(__DIR__) . '/src/FeedParser.php'; require dirname(__DIR__) . '/src/Security.php'; require dirname(__DIR__) . '/src/Support.php';
+require dirname(__DIR__) . '/src/AiProvider.php'; require dirname(__DIR__) . '/src/MockAiProvider.php'; require dirname(__DIR__) . '/src/ContentSanitizer.php'; require dirname(__DIR__) . '/src/AiResponseValidator.php'; require dirname(__DIR__) . '/src/OpenAiProvider.php'; require dirname(__DIR__) . '/src/DraftPolicy.php';
