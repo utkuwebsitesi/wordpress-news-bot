@@ -143,7 +143,10 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
         .locator("tr", { hasText: "Fixture RSS" })
         .getByRole("button", { name: "Fetch News", exact: true }),
     ).toBeVisible();
-    await page.getByRole("link", { name: "Edit", exact: true }).click();
+    await page
+      .locator("tr", { hasText: "Fixture Atom" })
+      .getByRole("link", { name: "Edit", exact: true })
+      .click();
     await page.locator("#wpnb-source-name").fill("Fixture Atom edited");
     await page.getByRole("button", { name: "Update Source" }).click();
     await expect(page.locator(".wpnb-sources-table")).toContainText(
