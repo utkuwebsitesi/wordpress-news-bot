@@ -114,7 +114,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator(".wpnb-sources-table")).toContainText(
       "Fixture RSS",
     );
-    await page.getByRole("link", { name: "Edit" }).click();
+    await page.getByRole("link", { name: "Edit", exact: true }).click();
     await page.locator("#wpnb-source-name").fill("Fixture RSS edited");
     await page.getByRole("button", { name: "Update Source" }).click();
     await expect(page.locator(".wpnb-sources-table")).toContainText(
@@ -179,7 +179,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
 
   test("deletes a source only after explicit confirmation and preserves drafts", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
-    await page.getByRole("link", { name: "Delete" }).click();
+    await page.getByRole("link", { name: "Delete", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Delete news source" }),
     ).toBeVisible();
