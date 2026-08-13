@@ -10,7 +10,7 @@ for _ in {1..60}; do
   sleep 2
 done
 if (( ready == 0 )); then "${compose[@]}" logs wordpress; exit 1; fi
-"${compose[@]}" exec -T wordpress sh -c 'mkdir -p wp-content/mu-plugins && cp /integration/wpnb-test-mu.php wp-content/mu-plugins/wpnb-test-mu.php'
+"${compose[@]}" exec -T wordpress sh -c 'mkdir -p wp-content/mu-plugins && cp /integration/wpnb-test-mu.php wp-content/mu-plugins/wpnb-test-mu.php && chown -R www-data:www-data wp-content'
 export WPNB_BASE_URL="http://127.0.0.1:${WPNB_HTTP_PORT:-8080}"
 export WPNB_ZIP_PATH="${WPNB_ARTIFACTS_DIR}/wordpress-news-bot-0.4.0-rc.1.zip"
 npm ci
