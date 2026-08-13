@@ -20,7 +20,7 @@ final class DatabaseRepair
                 if($code==='index_missing'&&$this->addMissingIndex($logical,(string)$issue['index'],$automatic)){$changed++;continue;}
                 if($code==='index_mismatch'&&$this->replaceMismatchedIndex($logical,(string)$issue['index'],$automatic)){$changed++;continue;}
             }
-            if(!$automatic&&$this->tableExists(Support::table('sources'))){(new SourceMigration($this->db))->run((string)get_option('wpnb_schema_version',''));}
+            if($this->tableExists(Support::table('sources'))){(new SourceMigration($this->db))->run((string)get_option('wpnb_schema_version',''));}
             $after=$health->inspect();if($after['status']==='healthy'||($after['issues']!==[]&&count($after['issues'])===1&&$after['issues'][0]['code']==='schema_version_mismatch')){update_option('wpnb_schema_version',WPNB_SCHEMA_VERSION,false);delete_option('wpnb_source_recovery_required');$after=$health->inspect();}
             $status=$after['status']==='healthy'?'healthy':'repair_required';$code=$status==='healthy'?'engine_conversion_verified':'repair_required';$this->finishJournal($journal,$status,['changed'=>$changed,'after_fingerprint'=>$after['fingerprint'],'issues'=>$after['issues']]);return ['status'=>$status,'code'=>$code,'changed'=>$changed,'before'=>$before['fingerprint'],'after'=>$after['fingerprint'],'issues'=>$after['issues']];
         }catch(\Throwable $e){$after=$health->inspect();$this->finishJournal($journal,'repair_failed',['changed'=>$changed,'after_fingerprint'=>$after['fingerprint'],'error_class'=>get_class($e)]);throw $e;}

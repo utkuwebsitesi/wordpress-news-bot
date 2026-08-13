@@ -63,7 +63,7 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DEBUG: "1"
-      WORDPRESS_CONFIG_EXTRA: "define('WP_DEBUG_LOG', true); define('WP_DEBUG_DISPLAY', false); define('SCRIPT_DEBUG', true);"
+      WORDPRESS_CONFIG_EXTRA: "define('WP_DEBUG_LOG', true); define('WP_DEBUG_DISPLAY', false); define('SCRIPT_DEBUG', true); if (defined('WP_CLI') && WP_CLI && empty($$_SERVER['HTTP_HOST'])) $$_SERVER['HTTP_HOST'] = 'localhost';"
     extra_hosts:
       [
         "feed.test:93.184.216.34",
