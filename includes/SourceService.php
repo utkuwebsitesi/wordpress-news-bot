@@ -13,14 +13,16 @@ final class SourceService
         return ($this->tester ?? new SourceConnectionTester())->test($data['feed_url'], $data['allowed_domains_list']);
     }
 
-    public function save(array $input, int $sourceId = 0): int
+    public function save(array $input, int $sourceId = 0, ?array $verifiedTest = null): int
     {
         $data = $this->sanitize($input);
+        if(property_exists($this->db,'last_error'))$this->db->last_error='';
         $duplicate = (int) $this->db->get_var($this->db->prepare(
             'SELECT id FROM ' . Support::table('sources') . ' WHERE canonical_hash=%s AND id<>%d LIMIT 1',
             $data['canonical_hash'],
             $sourceId
         ));
+        if((string)($this->db->last_error??'')!=='')$this->throwDatabaseError();
         if ($duplicate > 0) {
             throw new \DomainException(__('This RSS source is already registered.', 'wordpress-news-bot'));
         }
@@ -31,7 +33,7 @@ final class SourceService
         }
         $urlChanged = !$existing || !hash_equals((string) ($existing['canonical_hash'] ?? ''), $data['canonical_hash'])
             || (string) ($existing['allowed_domains'] ?? '') !== $data['allowed_domains'];
-        $testResult = $urlChanged ? $this->testConnection($input) : null;
+        $testResult = $urlChanged ? ($verifiedTest ?? $this->testConnection($input)) : null;
 
         $now = Support::now();
         $record = [
@@ -143,7 +145,8 @@ final class SourceService
     private function sanitize(array $input): array
     {
         $name = sanitize_text_field((string) ($input['name'] ?? ''));
-        $url = SourceUrl::canonicalize(esc_url_raw((string) ($input['feed_url'] ?? '')));
+        $testId=bin2hex(random_bytes(8));
+        try{$url = SourceUrl::canonicalize(esc_url_raw((string) ($input['feed_url'] ?? '')));}catch(\Throwable$e){throw new SourceTestException('url_invalid',$testId,[], $e);}
         $parts = wp_parse_url($url);
         $primaryHost = SourceUrl::normalizeHost((string) ($parts['host'] ?? ''));
         $domains = preg_split('/[\r\n,]+/', (string) ($input['allowed_domains'] ?? '')) ?: [];
@@ -152,9 +155,8 @@ final class SourceService
         $wwwParent = str_starts_with($primaryHost, 'www.') ? substr($primaryHost, 4) : '';
         if ($wwwParent !== '' && count(explode('.', $wwwParent)) >= 3) $domains[] = $wwwParent;
         $domains = array_values(array_unique(array_filter($domains)));
-        if ($name === '' || !Security::validateFeedUrl($url, $domains)) {
-            throw new \InvalidArgumentException(__('The source details did not pass security validation.', 'wordpress-news-bot'));
-        }
+        if ($name === '') throw new SourceTestException('url_invalid',$testId);
+        if (!Security::validateFeedUrl($url, $domains)) throw new SourceTestException('host_invalid',$testId);
         return [
             'name' => $name,
             'feed_url' => $url,
@@ -172,6 +174,6 @@ final class SourceService
         if (str_contains($message, 'duplicate')) {
             throw new \DomainException(__('This RSS source is already registered.', 'wordpress-news-bot'));
         }
-        throw new \RuntimeException(__('The source could not be saved because of a database error.', 'wordpress-news-bot'));
+        throw new SourceTestException('database_failed',bin2hex(random_bytes(8)),['db_errno'=>(int)($this->db->last_errno??0)]);
     }
 }

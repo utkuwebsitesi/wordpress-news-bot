@@ -53,4 +53,21 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $plugin=file_get_contents(dirname(__DIR__).'/includes/Plugin.php');
         $this->assertStringNotContainsString("'last_error'=>sanitize_text_field(\$e->getMessage())",$plugin);
     }
+
+    public function testFailedFormStateAndRecoveryAcknowledgementAreImplemented():void
+    {
+        $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');
+        $this->assertStringContainsString('retainSourceForm($input)',$admin);
+        $this->assertStringContainsString("set_transient(\$this->sourceFormKey()",$admin);
+        $this->assertStringContainsString('source_test_token',$admin);
+        $this->assertStringContainsString('verifiedSourceTest($input)',$admin);
+        $this->assertStringContainsString('wpnb_dismiss_recovery',$admin);
+        $this->assertStringContainsString('update_user_meta',$admin);
+        $this->assertStringContainsString("delete_option('wpnb_source_recovery_required')",$admin);
+        $this->assertStringContainsString('Database::activate()',$admin);
+        $this->assertStringNotContainsString("update_option('wpnb_schema_version',WPNB_SCHEMA_VERSION",$admin);
+        foreach(['url_invalid','host_invalid','dns_failed','ip_blocked','redirect_blocked','http_failed','http_status_invalid','content_type_invalid','body_empty','xml_invalid','feed_invalid','database_failed']as$code)$this->assertStringContainsString($code,file_get_contents(dirname(__DIR__).'/includes/SourceConnectionTester.php').file_get_contents(dirname(__DIR__).'/includes/SourceService.php'));
+        $this->assertStringContainsString('result_code',$admin);
+        $this->assertStringContainsString('test_id',$admin);
+    }
 }

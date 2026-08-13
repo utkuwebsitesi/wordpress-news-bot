@@ -17,7 +17,7 @@ final class SourceServiceTest extends TestCase
         global $wpdb;
         $this->db = new FakeSourceDb();
         $wpdb = $this->db;
-        $tester = new SourceConnectionTester(static fn(): array => ['response'=>['code'=>200],'headers'=>[],'body'=>'<rss><channel><item><guid>1</guid><title>News</title><link>https://example.com/n</link></item></channel></rss>']);
+        $tester = new SourceConnectionTester(static fn(): array => ['response'=>['code'=>200],'headers'=>['content-type'=>'application/rss+xml'],'body'=>'<rss><channel><item><guid>1</guid><title>News</title><link>https://example.com/n</link></item></channel></rss>'],static fn():array=>['93.184.216.34']);
         $this->service = new SourceService($this->db, $tester);
     }
 
@@ -41,6 +41,12 @@ final class SourceServiceTest extends TestCase
         $this->assertSame("www.aa.com.tr\naa.com.tr", $this->db->lastInsertData['allowed_domains']);
     }
 
+    public function testDatabaseFailureHasSafeDiagnosticCode():void
+    {
+        $this->db->failInsertDatabase=true;
+        try{$this->service->save($this->input());$this->fail();}catch(\WordPressNewsBot\SourceTestException$e){$this->assertSame('database_failed',$e->resultCode);$this->assertMatchesRegularExpression('/^[a-f0-9]{16}$/',$e->testId);}
+    }
+
     public function testToggleAndTransactionalDeletePreserveProcessedSnapshots(): void
     {
         $this->db->row = ['id'=>3,'name'=>'Agency','feed_url'=>'https://example.com/feed','active'=>1];
@@ -61,12 +67,12 @@ final class SourceServiceTest extends TestCase
 
 final class FakeSourceDb
 {
-    public string $prefix='wp_'; public int $insert_id=10; public string $last_error=''; public int $duplicateId=0; public bool $failInsertAsDuplicate=false; public array $queries=[]; public array $lastInsertData=[]; public ?array $row=null;
+    public string $prefix='wp_'; public int $insert_id=10; public int $last_errno=0; public string $last_error=''; public int $duplicateId=0; public bool $failInsertAsDuplicate=false; public bool $failInsertDatabase=false; public array $queries=[]; public array $lastInsertData=[]; public ?array $row=null;
     public function prepare(string $sql, mixed ...$values): string { foreach($values as$value){$replacement=is_int($value)?(string)$value:"'".str_replace("'","''",(string)$value)."'";$sql=preg_replace('/%[ds]/',$replacement,$sql,1)??$sql;}return $sql; }
     public function get_var(string $sql): int { if(str_contains($sql,'canonical_hash'))return $this->duplicateId;if(str_contains($sql,"status IN ('new','review')"))return 2;if(str_contains($sql,"status NOT IN"))return 4;if(str_contains($sql,"status='draft_created'"))return 1;if(str_contains($sql,'locked_at'))return 0;return 0; }
     public function get_row(string $sql, mixed $format=null): ?array { return $this->row; }
     public function get_col(string $sql): array { return [11,12]; }
-    public function insert(string $table,array $data): bool { if($this->failInsertAsDuplicate){$this->last_error='Duplicate entry';return false;}$this->lastInsertData=$data;return true; }
+    public function insert(string $table,array $data): bool { if($this->failInsertAsDuplicate){$this->last_error='Duplicate entry';return false;}if($this->failInsertDatabase){$this->last_error='Unknown column';$this->last_errno=1054;return false;}$this->lastInsertData=$data;return true; }
     public function update(string $table,array $data,array $where): int { $this->queries[]='UPDATE '.$table.' '.json_encode($data);if(array_key_exists('active',$data))$this->row['active']=$data['active'];return 1; }
     public function delete(string $table,array $where,array $format=[]): int { $this->queries[]='DELETE '.$table;return 1; }
     public function query(string $sql): int { $this->queries[]=$sql;return 1; }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.3 - RSS diagnostics and form recovery
+
+- URL'den veritabanına kadar aşama bazlı, secretsız sonuç kodları ve destek Test Kimliği.
+- WordPress HTTP API için sade User-Agent, geniş XML Accept header'ı, sınırlı redirect ve her hedefte DNS/IP SSRF doğrulaması.
+- RSS 2.0, RSS 1.0/RDF, Atom, charset içeren XML Content-Type ve geçerli XML body fallback desteği.
+- Başarısız kaynak formunda ad, URL, kategori, durum ve gelişmiş ayarların korunması.
+- Başarılı test sonucunun kullanıcı ve form girdisine bağlı kısa süreli token ile güvenli yeniden kullanımı.
+- Kapatılabilir migration uyarısı; başarılı kayıt sonrası gerçek migration çalıştırılarak güvenli temizleme.
+
 ## 0.3.2 - Source migration recovery
 
 - Migration öncesi kaynak, havuz, kuyruk ve AI ilişki snapshot'ı tutan migration journal.

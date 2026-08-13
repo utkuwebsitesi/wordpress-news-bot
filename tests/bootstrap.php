@@ -13,11 +13,12 @@ if (!function_exists('absint')) { function absint(mixed $v): int { return abs((i
 if (!function_exists('wp_kses')) { function wp_kses(string $v, array $allowed): string { return strip_tags($v, '<p><br><strong><em><ul><ol><li><blockquote><a>'); } }
 if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_retrieve_response_code(array $r): int { return (int)($r['response']['code'] ?? 200); } }
 if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body(array $r): string { return (string)($r['body'] ?? ''); } }
-if (!function_exists('is_wp_error')) { function is_wp_error(mixed $v): bool { return false; } }
+if (!class_exists('WP_Error')) { class WP_Error { public function __construct(public string $code='error'){} } }
+if (!function_exists('is_wp_error')) { function is_wp_error(mixed $v): bool { return $v instanceof WP_Error; } }
 if (!function_exists('__')) { function __(string $v, string $domain='default'): string { return $v; } }
 if (!function_exists('wp_salt')) { function wp_salt(string $scheme='auth'): string { return 'unit-test-'.$scheme.'-salt'; } }
 if (!function_exists('wp_remote_retrieve_header')) { function wp_remote_retrieve_header(array $r, string $name): string { return (string)($r['headers'][$name] ?? ''); } }
 require dirname(__DIR__) . '/includes/FeedParser.php'; require dirname(__DIR__) . '/includes/SourceUrl.php'; require dirname(__DIR__) . '/includes/Security.php'; require dirname(__DIR__) . '/includes/Support.php';
 require dirname(__DIR__) . '/includes/AiProvider.php'; require dirname(__DIR__) . '/includes/MockAiProvider.php'; require dirname(__DIR__) . '/includes/ContentSanitizer.php'; require dirname(__DIR__) . '/includes/AiResponseValidator.php'; require dirname(__DIR__) . '/includes/OpenAiProvider.php'; require dirname(__DIR__) . '/includes/SecretStorage.php'; require dirname(__DIR__) . '/includes/Credentials.php'; require dirname(__DIR__) . '/includes/ConnectionService.php'; require dirname(__DIR__) . '/includes/SetupState.php'; require dirname(__DIR__) . '/includes/DraftPolicy.php';
-require dirname(__DIR__) . '/includes/SourceConnectionTester.php'; require dirname(__DIR__) . '/includes/SourceService.php'; require dirname(__DIR__) . '/includes/SourceRecoveryRequired.php'; require dirname(__DIR__) . '/includes/SourceMigration.php';
+require dirname(__DIR__) . '/includes/SourceTestException.php'; require dirname(__DIR__) . '/includes/SourceConnectionTester.php'; require dirname(__DIR__) . '/includes/SourceService.php'; require dirname(__DIR__) . '/includes/SourceRecoveryRequired.php'; require dirname(__DIR__) . '/includes/SourceMigration.php';
 require __DIR__ . '/SqliteWpdb.php';

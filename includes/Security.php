@@ -19,7 +19,7 @@ final class Security
         return false;
     }
     public static function hostMatchesAllowed(string $host, string $allowedHost): bool { $host=SourceUrl::normalizeHost($host);$allowedHost=SourceUrl::normalizeHost($allowedHost);return $host!==''&&$allowedHost!==''&&($host===$allowedHost||str_ends_with($host,'.'.$allowedHost)); }
-    private static function isPublicIp(string $ip): bool { return (bool) filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE); }
+    public static function isPublicIp(string $ip): bool { return (bool) filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE); }
     public static function canManage(): bool { return current_user_can('manage_options'); }
     public static function canReview(): bool { return current_user_can('manage_options') || current_user_can('edit_posts'); }
     public static function cleanLogContext(array $context): array
