@@ -1,0 +1,12 @@
+{
+  "output": [
+    {
+      "content": [
+        {
+          "type": "output_text",
+          "text": "{\"title\":\"Deterministic draft\",\"excerpt\":\"Deterministic excerpt\",\"content_html\":\"<p>Deterministic safe content.</p>\",\"suggested_tags\":[\"fixture\"],\"seo_title\":\"Deterministic SEO\",\"seo_description\":\"Deterministic description\"}"
+        }
+      ]
+    }
+  ]
+}
