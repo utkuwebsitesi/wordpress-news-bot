@@ -1,6 +1,8 @@
 # WordPress News Bot
 
-Current release: `0.2.2`
+Current release: `0.3.1`
+
+0.3.1 sürümü Haber Kaynakları ekranına kaydetmeden önce bağlantı testi, düzenleme, aktif/pasif durumu, onaylı silme ve toplu işlemler ekler. Canonical URL SHA-256 benzersizliği eşzamanlı isteklerde dahi duplicate feed kaydını engeller; şema yükseltmesi mevcut duplicate kaynakları güvenli biçimde birleştirip ilişkili kayıtları ana kaynağa taşır.
 
 Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
 

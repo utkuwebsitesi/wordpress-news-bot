@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 - News source maintenance
+
+- Source connection test, edit, active/inactive, confirmed delete, and bulk action flows.
+- RSS/Atom tests protected by SSRF, redirect, and allowed-host validation.
+- Canonical feed URL SHA-256 unique index and concurrent duplicate protection.
+- Idempotent schema migration that merges existing duplicate sources and reassigns related records.
+- Transactional deletion with job-lock checks, pending-pool cleanup, and preservation of existing WordPress posts.
+
 ## 0.3.0 - Secure onboarding and credentials
 
 - Yönetim panelinden test edilerek kaydedilen, Sodium/AES-256-GCM şifreli OpenAI API anahtarı yönetimi.
