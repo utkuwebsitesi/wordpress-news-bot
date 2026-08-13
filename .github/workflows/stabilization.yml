@@ -8,6 +8,10 @@ on:
 
 permissions: { contents: read }
 
+concurrency:
+  group: stabilization-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   php-quality:
     name: PHP ${{ matrix.php }} / MariaDB InnoDB

@@ -50,8 +50,13 @@ services:
         certs: { condition: service_completed_successfully },
         mock: { condition: service_started },
       }
-    command: >-
-      sh -c "cp /certs/ca.crt /usr/local/share/ca-certificates/wpnb-test-ca.crt && update-ca-certificates >/dev/null && apache2-foreground"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        cp /certs/ca.crt /usr/local/share/ca-certificates/wpnb-test-ca.crt &&
+        update-ca-certificates >/dev/null &&
+        exec docker-entrypoint.sh apache2-foreground
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
