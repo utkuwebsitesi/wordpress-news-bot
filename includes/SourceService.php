@@ -16,13 +16,15 @@ final class SourceService
     public function save(array $input, int $sourceId = 0, ?array $verifiedTest = null): int
     {
         $data = $this->sanitize($input);
+        $testId=(string)($verifiedTest['test_id']??bin2hex(random_bytes(8)));
+        if(method_exists($this->db,'get_charset_collate')){$schema=(new DatabaseHealth($this->db))->sourceReady();if(!$schema['ready']){$issue=$schema['issues'][0]??['code'=>'metadata_query_failed'];$dbCode=match($issue['code']??''){ 'table_missing'=>'db_table_missing','column_missing'=>'db_column_missing','index_missing','index_mismatch'=>'db_index_missing','column_type_mismatch','column_nullability_mismatch','column_default_mismatch','column_extra_mismatch'=>'db_data_mismatch','collation_mismatch'=>'db_collation_mismatch',default=>'db_unknown'};throw new SourceTestException('database_schema_invalid',$testId,['stage'=>'database','db_code'=>$dbCode,'operation'=>'schema_check','schema_fingerprint'=>$schema['fingerprint'],'suggestion'=>'Open System Health and run Database Repair.']);}}
         if(property_exists($this->db,'last_error'))$this->db->last_error='';
         $duplicate = (int) $this->db->get_var($this->db->prepare(
             'SELECT id FROM ' . Support::table('sources') . ' WHERE canonical_hash=%s AND id<>%d LIMIT 1',
             $data['canonical_hash'],
             $sourceId
         ));
-        if((string)($this->db->last_error??'')!=='')$this->throwDatabaseError();
+        if((string)($this->db->last_error??'')!=='')$this->throwDatabaseError($testId,'duplicate_lookup');
         if ($duplicate > 0) {
             throw new \DomainException(__('This RSS source is already registered.', 'wordpress-news-bot'));
         }
@@ -57,17 +59,19 @@ final class SourceService
             $record['last_error'] = null;
         }
         if ($sourceId > 0) {
-            $ok = $this->db->update(Support::table('sources'), $record, ['id' => $sourceId]);
+            $ok = $this->db->update(Support::table('sources'), $record, ['id' => $sourceId], ['%s','%s','%s','%s','%d','%d','%s',...($testResult!==null?['%s','%s','%s']:[])], ['%d']);
             if ($ok === false) {
-                $this->throwDatabaseError();
+                $this->throwDatabaseError($testId,'source_update');
             }
             return $sourceId;
         }
         $record['created_at'] = $now;
-        $ok = $this->db->insert(Support::table('sources'), $record);
-        if ($ok === false) {
-            $this->throwDatabaseError();
+        $formats=['%s','%s','%s','%s','%d','%d','%s'];if($testResult!==null)$formats=array_merge($formats,['%s','%s','%s']);$formats[]='%s';
+        $ok = $this->db->insert(Support::table('sources'), $record, $formats);
+        if ($ok === false || (int)$ok !== 1) {
+            $this->throwDatabaseError($testId,'source_insert');
         }
+        if((int)$this->db->insert_id<1)$this->throwDatabaseError($testId,'source_insert',0);
         return (int) $this->db->insert_id;
     }
 
@@ -168,12 +172,13 @@ final class SourceService
         ];
     }
 
-    private function throwDatabaseError(): never
+    private function throwDatabaseError(string$testId,string$operation,int$affectedRows=0): never
     {
-        $message = strtolower((string) ($this->db->last_error ?? ''));
-        if (str_contains($message, 'duplicate')) {
+        $classified=DatabaseErrorClassifier::classify((string)($this->db->last_error??''),(int)($this->db->last_errno??0));
+        if ($classified['code']==='db_duplicate') {
             throw new \DomainException(__('This RSS source is already registered.', 'wordpress-news-bot'));
         }
-        throw new SourceTestException('database_failed',bin2hex(random_bytes(8)),['db_errno'=>(int)($this->db->last_errno??0)]);
+        $fingerprint='';if(method_exists($this->db,'get_charset_collate'))try{$fingerprint=(new DatabaseHealth($this->db))->inspect()['fingerprint'];}catch(\Throwable){}
+        throw new SourceTestException('database_failed',$testId,['stage'=>'database','db_code'=>$classified['code'],'db_errno'=>$classified['errno'],'error_fingerprint'=>$classified['error_fingerprint'],'operation'=>$operation,'affected_rows'=>$affectedRows,'schema_fingerprint'=>$fingerprint,'suggestion'=>$classified['suggestion']]);
     }
 }

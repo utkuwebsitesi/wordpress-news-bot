@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.4 - Database diagnostics and safe repair
+
+- Fiziksel tablo/sütun/index/tür/default/motor/charset/collation denetimi ve güvenli schema fingerprint'i.
+- Test Kimliğiyle aranabilen, allowlist alanlı ve secret/ham SQL/içerik içermeyen tanılama kayıtları.
+- `manage_options`, POST ve nonce korumalı; journal kullanan, aşamalı ve idempotent “Veritabanını Onar” işlemi.
+- 0.3.0 eksik `canonical_hash`, `last_checked_at`, `last_result` yapılarından güvenli yükseltme ve duplicate doğrulamalı unique index onarımı.
+- Kaynak insert/update işlemlerinde açık `$wpdb` format dizileri, etkilenen satır doğrulaması ve güvenli DB hata sınıflandırması.
+- Onarım sırasında başarılı RSS test tokenının korunması; başarılı insert sonrasında tüketilmesi.
+- MariaDB 10.11 servisli CI upgrade/integration test matrisi.
+
 ## 0.3.3 - RSS diagnostics and form recovery
 
 - Eklenti geliştirici/yazar bilgisi kalıcı olarak `Utkuweb` şeklinde tanımlandı.

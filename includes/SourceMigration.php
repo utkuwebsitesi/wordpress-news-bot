@@ -15,9 +15,6 @@ final class SourceMigration
         $recovered = $this->recoverIncompleteJournal() ? 1 : 0;
         $sourcesTable = Support::table('sources');
         $sources = (array) $this->db->get_results("SELECT * FROM $sourcesTable ORDER BY created_at ASC,id ASC", ARRAY_A);
-        if (!$sources && $previousVersion === '1.3.0') {
-            throw new SourceRecoveryRequired(__('The previous source migration did not complete. Source information could not be restored automatically. Please add the source again.', 'wordpress-news-bot'));
-        }
         if (!$sources) {
             $this->ensureUniqueIndex();
             return ['groups'=>0,'sources_merged'=>0,'items_merged'=>0,'recovered'=>$recovered];

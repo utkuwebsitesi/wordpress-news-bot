@@ -1,6 +1,6 @@
 # WordPress News Bot
 
-Current release: `0.3.3`
+Current release: `0.3.4`
 
 Geliştirici: **Utkuweb**
 
@@ -9,6 +9,8 @@ Geliştirici: **Utkuweb**
 0.3.2 migration işlemi öncesinde kaynaklar ve ilişkili havuz/kuyruk kayıtları için güvenli bir journal snapshot'ı oluşturur. Satır sayısı veya ilişki taşıma doğrulaması başarısızsa rollback ve snapshot geri yükleme uygulanır; schema sürümü yalnızca başarıdan sonra yükseltilir. 0.3.1 sonrasında kaynak tablosu boş ve kurtarılabilir snapshot yoksa yönetici açıkça uyarılır ve uydurma kaynak oluşturulmaz. Ana izin verilen host RSS URL'sinden otomatik çıkarılır; güvenli gerçek alt alan eşleşmesi desteklenir.
 
 0.3.3 kaynak testini URL, DNS/IP, HTTP, redirect, Content-Type, body, XML, feed ve veritabanı aşamalarında güvenli sonuç kodlarıyla izler. RSS 2.0, RSS 1.0/RDF ve Atom; XML charset değerleri ve genel Content-Type ile gelen geçerli feed'ler desteklenir. Başarısız form girdileri korunur, başarılı test sonucu kısa süreli kullanıcı/form tokenıyla yeniden kullanılabilir ve migration uyarısı kullanıcı tarafından kapatılabilir.
+
+0.3.4 fiziksel veritabanı şemasını kayıtlı sürümden bağımsız denetler. Sistem Sağlığı ekranı tablo, sütun, index, motor ve collation durumunu içerik göstermeden raporlar; güvenli ve idempotent onarım eksik yapıları migration journal ile tamamlar. RSS testi başarılı olduğu halde şema bozuksa aynı test tokenı korunur ve onarım sonrasında yeniden HTTP isteği yapılmadan kaynak kaydedilebilir.
 
 Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
 

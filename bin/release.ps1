@@ -1,4 +1,4 @@
-param([string]$Version = '0.3.3')
+param([string]$Version = '0.3.4')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $out = Join-Path $root ("wordpress-news-bot-$Version.zip")
@@ -13,7 +13,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $root 'composer.lock') -Destination $dependencyStage -Force
     composer install --no-dev --no-interaction --prefer-dist --working-dir $dependencyStage | Out-Null
 
-    $files = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { $_.FullName -notmatch '\\(vendor|tests|\.git)\\' -and $_.Name -notlike '*.zip' -and $_.Name -notlike '.env*' -and $_.Name -ne '.phpunit.result.cache' -and $_.Name -notin @('.gitignore','composer.json','composer.lock','phpunit.xml.dist') -and $_.FullName -notmatch '\\bin\\' }
+    $files = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { $_.FullName -notmatch '\\(vendor|tests|\.git|\.github)\\' -and $_.Name -notlike '*.zip' -and $_.Name -notlike '.env*' -and $_.Name -ne '.phpunit.result.cache' -and $_.Name -notin @('.gitignore','composer.json','composer.lock','phpunit.xml.dist') -and $_.FullName -notmatch '\\bin\\' }
     foreach ($file in $files) {
         $relative = $file.FullName.Substring($root.Length).TrimStart('\')
         $target = Join-Path $plugin $relative

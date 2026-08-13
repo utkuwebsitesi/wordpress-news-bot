@@ -25,14 +25,18 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $this->assertStringContainsString("!=='POST'",$source);
         $this->assertStringContainsString('check_admin_referer',$source);
         $this->assertStringContainsString('Security::canManage()',$source);
+        $this->assertStringContainsString("requirePostAction('wpnb_repair_database')",$source);
+        $this->assertStringContainsString("'wpnb-health'],true)?'manage_options'",$source);
         $this->assertStringContainsString('confirm(',$source);
     }
 
     public function testSchemaAndMigrationEnforceCanonicalUniquenessAndMoveRelations(): void
     {
         $database=file_get_contents(dirname(__DIR__).'/includes/Database.php');
+        $schema=file_get_contents(dirname(__DIR__).'/includes/DatabaseSchema.php');
+        $repair=file_get_contents(dirname(__DIR__).'/includes/DatabaseRepair.php');
         $migration=file_get_contents(dirname(__DIR__).'/includes/SourceMigration.php');
-        $this->assertStringContainsString('canonical_hash char(64)',$database);
+        $this->assertStringContainsString("'canonical_hash'=>\"char(64)",$schema);
         $this->assertStringContainsString('canonical_hash_unique',$migration);
         $this->assertStringContainsString('START TRANSACTION',$migration);
         $this->assertStringContainsString('COMMIT',$migration);
@@ -41,9 +45,12 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $this->assertStringContainsString('moveRelations($generationsTable',$migration);
         $this->assertStringContainsString('source_duplicate_migration',$migration);
         $this->assertStringNotContainsString('wp_posts',$migration);
-        $this->assertStringContainsString("update_option('wpnb_schema_version', WPNB_SCHEMA_VERSION",$database);
-        $this->assertStringContainsString('catch (SourceRecoveryRequired',$database);
-        $this->assertLessThan(strpos($database,"update_option('wpnb_schema_version'"),strpos($database,'->run($previousVersion)'));
+        $this->assertStringContainsString("update_option('wpnb_schema_version',WPNB_SCHEMA_VERSION",$repair);
+        $this->assertStringContainsString("\$after['status']==='healthy'",$repair);
+        $this->assertStringNotContainsString('DROP TABLE',$repair);
+        $this->assertStringNotContainsString('TRUNCATE',$repair);
+        $this->assertStringContainsString('migration_journal',$repair);
+        $this->assertStringContainsString('schema_fingerprint',$repair);
     }
 
     public function testInactiveSourcesAreExcludedFromCronAndImporter(): void
@@ -74,10 +81,13 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $this->assertStringContainsString('wpnb_dismiss_recovery',$admin);
         $this->assertStringContainsString('update_user_meta',$admin);
         $this->assertStringContainsString("delete_option('wpnb_source_recovery_required')",$admin);
-        $this->assertStringContainsString('Database::activate()',$admin);
+        $this->assertStringContainsString('DatabaseRepair($wpdb)',$admin);
+        $this->assertStringContainsString('wpnb_repair_database',$admin);
         $this->assertStringNotContainsString("update_option('wpnb_schema_version',WPNB_SCHEMA_VERSION",$admin);
-        foreach(['url_invalid','host_invalid','dns_failed','ip_blocked','redirect_blocked','http_failed','http_status_invalid','content_type_invalid','body_empty','xml_invalid','feed_invalid','database_failed']as$code)$this->assertStringContainsString($code,file_get_contents(dirname(__DIR__).'/includes/SourceConnectionTester.php').file_get_contents(dirname(__DIR__).'/includes/SourceService.php'));
+        foreach(['url_invalid','host_invalid','dns_failed','ip_blocked','redirect_blocked','http_failed','http_status_invalid','content_type_invalid','body_empty','xml_invalid','feed_invalid','database_schema_invalid','database_failed']as$code)$this->assertStringContainsString($code,file_get_contents(dirname(__DIR__).'/includes/SourceConnectionTester.php').file_get_contents(dirname(__DIR__).'/includes/SourceService.php'));
         $this->assertStringContainsString('result_code',$admin);
         $this->assertStringContainsString('test_id',$admin);
+        $this->assertStringContainsString('Copy Diagnostic Information',$admin);
+        $this->assertStringNotContainsString('$wpdb->last_query',$admin);
     }
 }

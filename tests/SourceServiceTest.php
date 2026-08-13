@@ -44,7 +44,7 @@ final class SourceServiceTest extends TestCase
     public function testDatabaseFailureHasSafeDiagnosticCode():void
     {
         $this->db->failInsertDatabase=true;
-        try{$this->service->save($this->input());$this->fail();}catch(\WordPressNewsBot\SourceTestException$e){$this->assertSame('database_failed',$e->resultCode);$this->assertMatchesRegularExpression('/^[a-f0-9]{16}$/',$e->testId);}
+        try{$this->service->save($this->input(),0,['test_id'=>'0e4828f44c90f0af','http_status'=>200,'feed_type'=>'Atom','item_count'=>20,'duration_ms'=>162]);$this->fail();}catch(\WordPressNewsBot\SourceTestException$e){$this->assertSame('database_failed',$e->resultCode);$this->assertSame('0e4828f44c90f0af',$e->testId);$this->assertSame('db_column_missing',$e->diagnostics['db_code']);$this->assertSame('source_insert',$e->diagnostics['operation']);$this->assertArrayNotHasKey('sql',$e->diagnostics);}
     }
 
     public function testToggleAndTransactionalDeletePreserveProcessedSnapshots(): void

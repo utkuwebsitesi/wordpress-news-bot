@@ -74,7 +74,7 @@ function validateRelease(string $archive, string $root, string $required): array
         if (!str_starts_with($entry, $root . '/')) {
             throw new RuntimeException('ZIP entry is outside the plugin root: ' . $entry);
         }
-        if (preg_match('~(^|/)(?:\.git|tests|cache|\.env(?:\..*)?)(?:/|$)~i', $entry) || str_ends_with(strtolower($entry), '.zip')) {
+        if (preg_match('~(^|/)(?:\.git|\.github|tests|cache|\.env(?:\..*)?)(?:/|$)~i', $entry) || str_ends_with(strtolower($entry), '.zip')) {
             throw new RuntimeException('Development or generated file found in release ZIP: ' . $entry);
         }
         $parts = explode('/', $entry);
