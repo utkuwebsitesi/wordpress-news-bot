@@ -1,0 +1,64 @@
+<?php
+declare(strict_types=1);
+namespace WordPressNewsBot;
+
+final class AutomationService
+{
+    public function __construct(private readonly ?OptionLock$locks=null){}
+
+    public function heartbeat():void{update_option('wpnb_automation_heartbeat',Support::now(),false);}
+
+    /** @return array{status:string,fetched:int,published:int,skipped:int,duplicate:int,failed:int,message:string,post_ids:list<int>} */
+    public function run(string$trigger='cron',bool$forceDue=false):array
+    {
+        $this->heartbeat();$settings=AutomationSettings::merge((array)get_option('wpnb_settings',[]));$summary=['status'=>'disabled','fetched'=>0,'published'=>0,'skipped'=>0,'duplicate'=>0,'failed'=>0,'message'=>'automation_disabled','post_ids'=>[]];
+        if(empty($settings['automation_enabled']))return$summary;
+        $locks=$this->locks??new OptionLock();if(!$locks->acquire('automation_global',15*MINUTE_IN_SECONDS)){return array_replace($summary,['status'=>'locked','message'=>'automation_locked']);}
+        global$wpdb;$runId=0;$oldUser=function_exists('get_current_user_id')?get_current_user_id():0;
+        try{
+            $owner=(int)$settings['automation_owner_user_id'];if($owner>0&&function_exists('wp_set_current_user'))wp_set_current_user($owner);
+            $run=['trigger_type'=>sanitize_key($trigger),'status'=>'running','fetched_count'=>0,'published_count'=>0,'skipped_count'=>0,'duplicate_count'=>0,'failed_count'=>0,'message_code'=>'','started_at'=>Support::now(),'finished_at'=>null];$wpdb->insert(Support::table('automation_runs'),$run,DatabaseSchema::formatsFor('automation_runs',$run));$runId=(int)$wpdb->insert_id;
+            $import=$this->importSources();$summary['fetched']=$import['new'];$summary['duplicate']=$import['duplicate'];$summary['failed']=$import['failed'];
+            $pause=(int)get_option('wpnb_automation_ai_paused_until',0);if($pause>time()){$summary['status']='paused';$summary['message']='ai_temporarily_paused';return$this->finish($runId,$summary);}
+            $due=$this->dueState($settings,$forceDue);if($due!=='due'){$summary['status']=$due==='daily_quota_complete'?'complete':'waiting';$summary['message']=$due;return$this->finish($runId,$summary);}
+            $limit=min((int)$settings['automation_batch_limit'],$forceDue?(int)$settings['automation_catchup_limit']:1);$limit=max(1,$limit);
+            for($i=0;$i<$limit;$i++){
+                $item=$this->nextItem($settings);if(!$item){$summary['skipped']++;$summary['message']='queue_empty';break;}
+                $before=(int)$item['wordpress_post_id'];try{$postId=(new DraftService())->create((int)$item['id'],['publication_mode'=>$settings['publication_mode'],'require_image'=>(bool)$settings['automation_require_image'],'require_ai_quality'=>(bool)$settings['automation_require_ai']]);if($before>0){$summary['duplicate']++;continue;}
+                    $published=get_post_status($postId)==='publish';$wpdb->update(Support::table('feed_items'),['automation_published_at'=>Support::now(),'automation_next_retry_at'=>null,'updated_at'=>Support::now()],['id'=>(int)$item['id']],['%s','%s','%s'],['%d']);update_post_meta($postId,'_wpnb_automation_run_id',$runId);update_post_meta($postId,'_wpnb_automation_published_at',Support::now());update_option('wpnb_automation_last_source_id',(int)$item['source_id'],false);update_option('wpnb_automation_last_publication',time(),false);$summary[$published?'published':'skipped']++;$summary['post_ids'][]=$postId;
+                }catch(\Throwable$e){$summary['failed']++;$this->recordItemFailure((int)$item['id'],$e,(int)$settings['automation_retry_limit']);if(str_contains(strtolower($e->getMessage()),'usage limit'))update_option('wpnb_automation_ai_paused_until',time()+15*MINUTE_IN_SECONDS,false);}
+            }
+            $summary['status']=$summary['failed']>0?'partial':'completed';if($summary['message']==='')$summary['message']='run_completed';return$this->finish($runId,$summary);
+        }finally{if(function_exists('wp_set_current_user'))wp_set_current_user($oldUser);$locks->release('automation_global');update_option('wpnb_last_automation_run',Support::now(),false);}
+    }
+
+    /** @return array{new:int,duplicate:int,failed:int} */
+    private function importSources():array
+    {
+        global$wpdb;$totals=['new'=>0,'duplicate'=>0,'failed'=>0];$now=Support::now();$rows=(array)$wpdb->get_results($wpdb->prepare('SELECT * FROM '.Support::table('sources').' WHERE active=1 AND (paused_until IS NULL OR paused_until<%s) ORDER BY priority DESC,id ASC',$now),ARRAY_A);
+        foreach($rows as$source){$id=(int)$source['id'];try{$result=(new SourceImporter())->importDetailed($id);$totals['new']+=(int)$result['new'];$totals['duplicate']+=(int)$result['duplicate'];$wpdb->update(Support::table('sources'),['consecutive_failures'=>0,'paused_until'=>null,'updated_at'=>$now],['id'=>$id],['%d','%s','%s'],['%d']);}catch(\Throwable$e){$totals['failed']++;$failures=(int)($source['consecutive_failures']??0)+1;$wpdb->update(Support::table('sources'),['consecutive_failures'=>$failures,'paused_until'=>$failures>=3?gmdate('Y-m-d H:i:s',time()+HOUR_IN_SECONDS):null,'last_error'=>__('The source is temporarily unavailable.','wordpress-news-bot'),'updated_at'=>$now],['id'=>$id],['%d','%s','%s','%s'],['%d']);$this->log('source_automation_failed',['source_id'=>$id,'failure_count'=>$failures,'exception_class'=>get_class($e)]);}
+        }return$totals;
+    }
+
+    private function dueState(array$settings,bool$force):string
+    {
+        $now=$this->now();if(!in_array((int)$now->format('N'),(array)$settings['automation_days'],true))return'inactive_day';$clock=$now->format('H:i');if(!$force&&!$this->insideWindow($clock,(string)$settings['automation_start'],(string)$settings['automation_end']))return'outside_window';
+        if($this->publishedToday()>=(int)$settings['automation_daily_limit'])return'daily_quota_complete';$last=(int)get_option('wpnb_automation_last_publication',0);if(!$force&&$last>0&&time()-$last<AutomationSettings::spreadMinutes($settings)*MINUTE_IN_SECONDS)return'waiting_interval';return'due';
+    }
+
+    private function nextItem(array$settings):?array
+    {
+        global$wpdb;[$start,$end]=Support::siteDayUtcBounds($this->now());$activation=(string)get_option('wpnb_automation_enabled_at','');$minimum=gmdate('Y-m-d H:i:s',time()-(int)$settings['automation_max_age_hours']*HOUR_IN_SECONDS);if(!empty($settings['automation_process_existing'])&&$settings['automation_backlog_since']!==''){$tz=$this->now()->getTimezone();$minimum=max($minimum,(new \DateTimeImmutable($settings['automation_backlog_since'].' 00:00:00',$tz))->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'));if($activation!==''){$usedBacklog=(int)$wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM '.Support::table('feed_items').' WHERE automation_published_at IS NOT NULL AND created_at<%s',$activation));if($usedBacklog>=(int)$settings['automation_backlog_limit'])$minimum=max($minimum,$activation);}}elseif($activation!=='')$minimum=max($minimum,$activation);
+        $last=(int)get_option('wpnb_automation_last_source_id',0);$sources=(array)$wpdb->get_results($wpdb->prepare('SELECT s.*,COALESCE(SUM(CASE WHEN f.automation_published_at>=%s AND f.automation_published_at<%s THEN 1 ELSE 0 END),0) used FROM '.Support::table('sources').' s LEFT JOIN '.Support::table('feed_items').' f ON f.source_id=s.id WHERE s.active=1 AND s.category_id>0 AND (s.paused_until IS NULL OR s.paused_until<%s) GROUP BY s.id ORDER BY s.priority DESC,(s.id<=%d),s.id ASC',$start,$end,Support::now(),$last),ARRAY_A);
+        foreach($sources as$source){$quota=min((int)$settings['automation_source_limit'],max(1,(int)$source['daily_quota']));if((int)$source['used']>=$quota)continue;$sql=$wpdb->prepare("SELECT f.*,s.import_images,s.draft_without_image FROM ".Support::table('feed_items')." f JOIN ".Support::table('sources')." s ON s.id=f.source_id WHERE f.source_id=%d AND f.status IN ('new','review','error') AND f.wordpress_post_id=0 AND f.wordpress_category_id>0 AND f.created_at>=%s AND f.automation_attempts<=%d AND (f.automation_next_retry_at IS NULL OR f.automation_next_retry_at<=%s) ORDER BY COALESCE(f.published_at,f.created_at) DESC,f.id DESC LIMIT 1",(int)$source['id'],$minimum,(int)$settings['automation_retry_limit'],Support::now());$item=$wpdb->get_row($sql,ARRAY_A);if($item)return$item;
+        }return null;
+    }
+
+    private function publishedToday():int{global$wpdb;[$start,$end]=Support::siteDayUtcBounds($this->now());return(int)$wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM '.Support::table('feed_items').' WHERE automation_published_at>=%s AND automation_published_at<%s',$start,$end));}
+    private function recordItemFailure(int$id,\Throwable$e,int$limit):void{global$wpdb;$attempts=(int)$wpdb->get_var($wpdb->prepare('SELECT automation_attempts FROM '.Support::table('feed_items').' WHERE id=%d',$id))+1;$retry=$attempts<=$limit?gmdate('Y-m-d H:i:s',time()+min(60,5*$attempts)*MINUTE_IN_SECONDS):null;$wpdb->update(Support::table('feed_items'),['automation_attempts'=>$attempts,'automation_next_retry_at'=>$retry,'status'=>'error','updated_at'=>Support::now()],['id'=>$id],['%d','%s','%s','%s'],['%d']);$this->log('automation_item_failed',['feed_item_id'=>$id,'attempt'=>$attempts,'exception_class'=>get_class($e)]);}
+    private function finish(int$runId,array$summary):array{global$wpdb;if($runId>0)$wpdb->update(Support::table('automation_runs'),['status'=>$summary['status'],'fetched_count'=>$summary['fetched'],'published_count'=>$summary['published'],'skipped_count'=>$summary['skipped'],'duplicate_count'=>$summary['duplicate'],'failed_count'=>$summary['failed'],'message_code'=>$summary['message'],'finished_at'=>Support::now()],['id'=>$runId],['%s','%d','%d','%d','%d','%d','%s','%s'],['%d']);$this->incrementDaily($summary);$this->log('automation_run_finished',$summary);return$summary;}
+    private function incrementDaily(array$summary):void{global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$date=Support::siteDate();$wpdb->query($wpdb->prepare("INSERT INTO $table (usage_date,published_count,skipped_count,duplicate_count,failed_count) VALUES (%s,%d,%d,%d,%d) ON DUPLICATE KEY UPDATE published_count=published_count+VALUES(published_count),skipped_count=skipped_count+VALUES(skipped_count),duplicate_count=duplicate_count+VALUES(duplicate_count),failed_count=failed_count+VALUES(failed_count)",$date,$summary['published'],$summary['skipped'],$summary['duplicate'],$summary['failed']));}
+    private function log(string$event,array$context):void{global$wpdb;$row=['level'=>str_contains($event,'failed')?'warning':'info','event'=>$event,'message'=>'Automation event recorded.','context_json'=>Support::json(Security::cleanLogContext($context)),'created_at'=>Support::now()];$wpdb->insert(Support::table('logs'),$row,DatabaseSchema::formatsFor('logs',$row));}
+    private function now():\DateTimeImmutable{$now=Support::siteNow();return function_exists('apply_filters')?apply_filters('wpnb_automation_now',$now):$now;}
+    private function insideWindow(string$clock,string$start,string$end):bool{return$start<=$end?$clock>=$start&&$clock<=$end:$clock>=$start||$clock<=$end;}
+}

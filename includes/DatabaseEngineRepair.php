@@ -5,7 +5,7 @@ namespace WordPressNewsBot;
 final class DatabaseEngineRepair
 {
     private const STATE_OPTION='wpnb_engine_repair_state';
-    private const ORDER=['migration_journal','sources','feed_items','jobs','ai_generations','logs','daily_usage'];
+    private const ORDER=['migration_journal','sources','feed_items','jobs','ai_generations','logs','daily_usage','automation_runs'];
     public function __construct(private readonly object$db){}
 
     /** @return array{code:string,innodb_available:bool,alter_allowed:bool,tables:array<string,array<string,mixed>>,total_rows:int,total_bytes:int} */

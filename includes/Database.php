@@ -14,10 +14,10 @@ final class Database
         } catch (\Throwable $e) {
             update_option('wpnb_source_recovery_required', ['reason'=>'database_repair_failed','detected_at'=>Support::now(),'error_class'=>get_class($e)], false);
         }
-        $defaults=['ai_provider'=>'openai','ai_model'=>'gpt-4o-mini','language'=>'tr','tone'=>'professional','min_words'=>300,'max_words'=>700,'show_attribution'=>0,'publication_mode'=>'publish','daily_ai_quota'=>25,'max_run_items'=>5,'image_max_bytes'=>5242880,'image_min_width'=>300,'image_min_height'=>200,'cron_enabled'=>0,'retention_days'=>90];
-        if(!add_option('wpnb_settings',$defaults,'',false)){$settings=(array)get_option('wpnb_settings',[]);if(!isset($settings['publication_mode'])){$settings['publication_mode']='publish';update_option('wpnb_settings',$settings,false);}}
+        $defaults=array_replace(['ai_provider'=>'openai','ai_model'=>'gpt-4o-mini','language'=>'tr','tone'=>'professional','min_words'=>300,'max_words'=>700,'show_attribution'=>0,'daily_ai_quota'=>25,'max_run_items'=>5,'image_max_bytes'=>5242880,'image_min_width'=>300,'image_min_height'=>200,'cron_enabled'=>0,'retention_days'=>90],AutomationSettings::defaults());
+        if(!add_option('wpnb_settings',$defaults,'',false)){$settings=(array)get_option('wpnb_settings',[]);$merged=array_replace($defaults,$settings);if($merged!==$settings)update_option('wpnb_settings',$merged,false);}
         add_option('wpnb_setup_state', SetupState::initial(), '', false);
         add_option('wpnb_connection_status', ['connected'=>0], '', false);
     }
-    public static function deactivate(): void { wp_clear_scheduled_hook('wpnb_poll_sources'); }
+    public static function deactivate(): void { wp_clear_scheduled_hook('wpnb_poll_sources');wp_clear_scheduled_hook('wpnb_automation_tick'); }
 }

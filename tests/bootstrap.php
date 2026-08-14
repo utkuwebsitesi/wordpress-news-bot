@@ -2,9 +2,11 @@
 declare(strict_types=1);
 if (!defined('ARRAY_A')) { define('ARRAY_A', 'ARRAY_A'); }
 if (!defined('MINUTE_IN_SECONDS')) { define('MINUTE_IN_SECONDS', 60); }
-if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.4.0-rc.4'); }
-if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '1.9.0'); }
+if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.5.0-rc.1'); }
+if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '2.0.0'); }
+if (!defined('HOUR_IN_SECONDS')) { define('HOUR_IN_SECONDS', 3600); }
 $GLOBALS['wpnb_test_options'] = [];
+require dirname(__DIR__) . '/includes/AutomationSettings.php'; require dirname(__DIR__) . '/includes/OptionLock.php';
 if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags(string $v): string { return trim(strip_tags($v)); } }
 if (!function_exists('wp_trim_words')) { function wp_trim_words(string $v, int $n): string { return implode(' ', array_slice(preg_split('/\s+/', trim($v)) ?: [], 0, $n)); } }
 if (!function_exists('esc_url_raw')) { function esc_url_raw(string $v): string { return trim($v); } }

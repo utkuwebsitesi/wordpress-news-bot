@@ -1,10 +1,12 @@
 # WordPress News Bot
 
-Current candidate: `0.4.0-rc.4`
+Current candidate: `0.5.0-rc.1`
+
+0.5.0-rc.1 adds a professional Automation page with WordPress-timezone daily and per-source quotas, active days and publishing window, minimum spacing, maximum item age, retry limits, source priority and round-robin balancing. The first enable timestamp excludes the old pool by default. Servers with WP-Cron disabled receive a WP-CLI-first, HTTPS-fallback cron command and a five-minute heartbeat health check.
 
 P0 manuel akış: `Kaynak ekle → Haberleri çek → Haber havuzunda incele → AI ile taslak oluştur → WordPress taslağını düzenle`. Kaynak bazlı ve toplu haber çekme işlemleri WP-Cron kapalıyken de aynı güvenli import servisini kullanır; kullanıcının WP-CLI, phpMyAdmin veya sunucu cron'una ihtiyacı yoktur.
 
-Durum: **release candidate / yayınlama yaşam döngüsü kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında güvenli iki aşamalı yayınlama, işlenen kayıt migrationı ve eski taslak aracı doğrulanmadan `0.4.0-rc.4` hazır veya production-ready kabul edilmez.
+Durum: **release candidate / günlük otomasyon kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında kota, heartbeat, cron, zaman dağıtımı, kilit, hata ve duplicate senaryoları doğrulanmadan `0.5.0-rc.1` hazır veya production-ready kabul edilmez.
 
 Geliştirici: **Utkuweb**
 
@@ -32,9 +34,9 @@ Global kullanım için plugin slug, namespace, sabitler, option/transient isimle
 
 ## Phase 1 ve Phase 2
 
-Bu sürüm RSS/Atom kaynaklarını yönetir, haber havuzuna güvenli ve idempotent biçimde alır, duplicate kontrolü yapar ve yönetim panelinde editör incelemesine sunar. Phase 2’de OpenAI Responses API ile strict JSON Schema çıktısı alınabilir; taslaklar WordPress’te daima `draft` statüsünde oluşturulur. Otomatik yayın yoktur.
+Bu sürüm RSS/Atom kaynaklarını yönetir, haber havuzuna güvenli ve idempotent biçimde alır, duplicate kontrolü yapar ve yönetim panelinde editör incelemesine sunar. OpenAI Responses API strict JSON Schema çıktısı üretir. Yönetici yayınlama modunu taslak veya doğrudan yayın olarak seçebilir; otomasyon varsayılan olarak kapalıdır ve yalnız bütün kalite kapıları geçtiğinde yayın yapar.
 
-OpenAI kullanımı için WordPress yönetim panelinde **WordPress News Bot → Ayarlar → OpenAI Bağlantısı** kartını açın. API anahtarı yalnızca sunucu tarafında test edilir; test başarılı olursa WordPress salt değerlerinden türetilen anahtarla şifrelenerek, autoload kapalı biçimde saklanır. Kaydedilen anahtar tekrar gösterilmez. Varsayılan cron kapalı, günlük kota 25 ve çalıştırma başına limit 5’tir.
+OpenAI kullanımı için WordPress yönetim panelinde **WordPress News Bot → Ayarlar → OpenAI Bağlantısı** kartını açın. API anahtarı yalnızca sunucu tarafında test edilir; test başarılı olursa WordPress salt değerlerinden türetilen anahtarla şifrelenerek, autoload kapalı biçimde saklanır. Kaydedilen anahtar tekrar gösterilmez. Otomasyonun önerilen başlangıç profili günlük 20 haber, kaynak başına 10 haber, 08:00–23:00 aralığı, 45 dakika minimum mesafe ve çalıştırma başına bir haberdir.
 
 İlk etkinleştirmede beş adımlı kurulum sihirbazı OpenAI bağlantısı, içerik ayarları, limitler, ilk RSS kaynağı ve özeti yönlendirir. Sihirbaz atlanabilir ve ayarlar daha sonra tamamlanabilir.
 
