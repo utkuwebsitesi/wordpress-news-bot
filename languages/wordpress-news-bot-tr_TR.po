@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WordPress News Bot 0.5.0-rc.2\n"
+"Project-Id-Version: WordPress News Bot 0.5.0-rc.3\n"
 "Language: tr_TR\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1013,3 +1013,66 @@ msgstr "Haber kaydı WordPress yazısıyla ilişkilendirilemedi."
 
 msgid "The post processing history could not be completed."
 msgstr "Yazı işlem geçmişi tamamlanamadı."
+
+msgid "Automation could not be enabled: the server trigger was not verified."
+msgstr "Otomasyon etkinleştirilemedi: sunucu tetikleyicisi doğrulanmadı."
+
+msgid "The cron connection could not be verified. Automation remains disabled."
+msgstr "Cron bağlantısı doğrulanamadı. Otomasyon kapalı kaldı."
+
+msgid "Automation disabled"
+msgstr "Otomasyon kapalı"
+
+msgid "Last successful heartbeat"
+msgstr "Son başarılı heartbeat zamanı"
+
+msgid "Last heartbeat error"
+msgstr "Son heartbeat hata nedeni"
+
+msgid "Last automation run"
+msgstr "Son otomasyon çalışma zamanı"
+
+msgid "None"
+msgstr "Yok"
+
+msgid "Monday"
+msgstr "Pazartesi"
+
+msgid "Tuesday"
+msgstr "Salı"
+
+msgid "Wednesday"
+msgstr "Çarşamba"
+
+msgid "Thursday"
+msgstr "Perşembe"
+
+msgid "Friday"
+msgstr "Cuma"
+
+msgid "Saturday"
+msgstr "Cumartesi"
+
+msgid "Sunday"
+msgstr "Pazar"
+
+msgid "A plugin critical error was recorded. Test ID: %s"
+msgstr "Bir eklenti kritik hatası kaydedildi. Test Kimliği: %s"
+
+msgid "The heartbeat test could not be scheduled."
+msgstr "Heartbeat testi zamanlanamadı."
+
+msgid "The WordPress cron URL could not be reached."
+msgstr "WordPress cron adresine ulaşılamadı."
+
+msgid "The WordPress cron URL returned an invalid status."
+msgstr "WordPress cron adresi geçersiz bir durum döndürdü."
+
+msgid "The cron callback did not run."
+msgstr "Cron geri çağrısı çalışmadı."
+
+msgid "A plugin critical error disabled automation."
+msgstr "Bir eklenti kritik hatası otomasyonu kapattı."
+
+msgid "The server trigger could not be verified."
+msgstr "Sunucu tetikleyicisi doğrulanamadı."

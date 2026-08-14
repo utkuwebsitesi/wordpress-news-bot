@@ -365,10 +365,51 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
   });
 
+  test("keeps heartbeat independent, verifies the real cron path, and saves automation safely in Turkish", async () => {
+    await page.request.post("/?rest_route=/wpnb-test/v1/ui-language", { headers: { "x-wpnb-test": "1" }, data: { language: "tr" } });
+    await page.request.post("/?rest_route=/wpnb-test/v1/cron-state", { headers: { "x-wpnb-test": "1" }, data: { mode: "reset" } });
+    await page.goto("/wp-admin/admin.php?page=wpnb-automation");
+    await expect(page.locator("#wpnb-cron-command")).toContainText("wp-cron.php");
+    await expect(page.locator("#wpnb-cron-command")).not.toContainText("wpnb_automation_tick");
+    await expect(page.locator("body")).toContainText("Otomasyon kapalı");
+    for (const day of ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]) await expect(page.locator("body")).toContainText(day);
+    for (const day of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]) await expect(page.locator("body")).not.toContainText(day);
+
+    await page.locator('input[name="automation_enabled"]').check();
+    await page.locator('form:has(input[name="action"][value="wpnb_save_automation"]) button[type="submit"], form:has(input[name="action"][value="wpnb_save_automation"]) button').click();
+    await expect(page.locator(".notice-error.is-dismissible")).toContainText("Otomasyon etkinleştirilemedi: sunucu tetikleyicisi doğrulanmadı.");
+    await expect(page.locator('input[name="automation_enabled"]')).not.toBeChecked();
+
+    const external = await page.request.post("/wp-cron.php");
+    expect(external.ok()).toBeTruthy();
+    await page.reload();
+    await expect(page.locator("body")).toContainText("Çalışıyor");
+    const before = await (await page.request.get("/?rest_route=/wpnb-test/v1/cron-state", { headers: { "x-wpnb-test": "1" } })).json();
+    await page.locator('form:has(input[name="action"][value="wpnb_automation_test_cron"]) button').click();
+    await expect(page.locator(".notice-success.is-dismissible")).toBeVisible();
+    const after = await (await page.request.get("/?rest_route=/wpnb-test/v1/cron-state", { headers: { "x-wpnb-test": "1" } })).json();
+    expect(after.posts).toBe(before.posts);
+    expect(after.ai_requests).toBe(before.ai_requests);
+    expect(after.healthy).toBeTruthy();
+
+    await page.locator('input[name="automation_enabled"]').check();
+    await page.locator('form:has(input[name="action"][value="wpnb_save_automation"]) button').click();
+    await expect(page.locator('input[name="automation_enabled"]')).toBeChecked();
+    await page.locator('input[name="automation_enabled"]').uncheck();
+    await page.locator('form:has(input[name="action"][value="wpnb_save_automation"]) button').click();
+    await expect(page.locator('input[name="automation_enabled"]')).not.toBeChecked();
+    await page.request.post("/?rest_route=/wpnb-test/v1/cron-state", { headers: { "x-wpnb-test": "1" }, data: { mode: "stale" } });
+    await page.reload();
+    await expect(page.locator("body")).toContainText("Son beş dakika içinde sunucu heartbeat'i alınmadı");
+    await page.request.post("/wp-cron.php");
+    console.log(`P0 cron evidence: heartbeat=${after.heartbeat} posts_unchanged=${after.posts} ai_unchanged=${after.ai_requests} cron_disabled=true`);
+    await page.request.post("/?rest_route=/wpnb-test/v1/ui-language", { headers: { "x-wpnb-test": "1" }, data: { language: "en" } });
+  });
+
   test("runs daily automation safely with heartbeat, quotas, backlog isolation, failures and concurrency", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-automation");
     await expect(page.getByRole("heading", { name: "Automation" }).first()).toBeVisible();
-    await expect(page.locator("#wpnb-cron-command")).toContainText("wpnb_automation_tick");
+    await expect(page.locator("#wpnb-cron-command")).toContainText("wp-cron.php");
     const before = await state(page);
     const setupResponse = await page.request.post("/?rest_route=/wpnb-test/v1/automation-setup", { headers: { "x-wpnb-test": "1" } });
     expect(setupResponse.ok()).toBeTruthy();

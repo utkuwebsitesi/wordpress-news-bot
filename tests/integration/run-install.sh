@@ -14,11 +14,13 @@ for _ in {1..60}; do
 done
 if (( ready == 0 )); then "${compose[@]}" logs wordpress; exit 1; fi
 "${compose[@]}" exec -T wordpress sh -c 'mkdir -p wp-content/mu-plugins && cp /integration/wpnb-test-mu.php wp-content/mu-plugins/wpnb-test-mu.php'
-"${compose[@]}" exec -T wordpress wp plugin install /artifacts/wordpress-news-bot-0.5.0-rc.2.zip --activate --allow-root
+"${compose[@]}" exec -T wordpress wp plugin install /artifacts/wordpress-news-bot-0.5.0-rc.3.zip --activate --allow-root
 "${compose[@]}" exec -T wordpress wp eval-file /integration/verify-install.php --allow-root
 "${compose[@]}" exec -T wordpress wp eval-file /integration/verify-feed-matrix.php --allow-root
 "${compose[@]}" exec -T wordpress wp option update wpnb_stabilization_sentinel preserved --allow-root >/dev/null
+"${compose[@]}" exec -T wordpress wp cron event schedule third_party_sentinel now hourly --allow-root >/dev/null
 "${compose[@]}" exec -T wordpress wp plugin deactivate wordpress-news-bot --allow-root >/dev/null
+"${compose[@]}" exec -T wordpress wp eval-file /integration/verify-cron-deactivation.php --allow-root
 "${compose[@]}" exec -T wordpress wp plugin activate wordpress-news-bot --allow-root >/dev/null
 test "$("${compose[@]}" exec -T wordpress wp option get wpnb_stabilization_sentinel --allow-root | tr -d '\r')" = preserved
 "${compose[@]}" exec -T wordpress wp eval-file /integration/verify-install.php --allow-root

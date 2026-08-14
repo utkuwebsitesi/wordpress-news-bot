@@ -19,5 +19,5 @@ final class Database
         add_option('wpnb_setup_state', SetupState::initial(), '', false);
         add_option('wpnb_connection_status', ['connected'=>0], '', false);
     }
-    public static function deactivate(): void { wp_clear_scheduled_hook('wpnb_poll_sources');wp_clear_scheduled_hook('wpnb_automation_tick'); }
+    public static function deactivate(): void { foreach(['wpnb_poll_sources','wpnb_automation_tick',CronHealth::HEARTBEAT_HOOK,CronHealth::TEST_HOOK]as$hook)wp_clear_scheduled_hook($hook); }
 }

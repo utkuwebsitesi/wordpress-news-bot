@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0-rc.3 - P0 automation heartbeat and cron recovery
+
+- Preserves the immutable `0.5.0-rc.2` package while moving the P0 correction to a new candidate.
+- Replaces the automation-dependent heartbeat with an idempotent `wpnb_heartbeat` event that remains observable while publishing is disabled.
+- Verifies the real WordPress cron loopback before enabling automation; the test neither fetches feeds nor calls AI nor creates posts.
+- Removes the disabled-hosting `escapeshellarg()` fatal from cron command rendering and records plugin critical failures with a secretless Test ID.
+- Shows Turkish weekday labels, real heartbeat/run state, a safe cron command and explicit manual controls on the automation screen.
+
 ## 0.5.0-rc.2 - Turkish administration fallback
 
 - Applies the bundled Turkish catalogue to the plugin administration screens when the plugin language is Turkish, even if the WordPress site locale is English.
