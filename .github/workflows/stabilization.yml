@@ -1,15 +1,12 @@
 name: Stabilization gates
 
 on:
-  push:
-    branches: [main, "stabilization/**"]
-  pull_request:
   workflow_dispatch:
 
 permissions: { contents: read }
 
 concurrency:
-  group: stabilization-${{ github.ref }}
+  group: stabilization-rc-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -98,12 +95,12 @@ jobs:
       - run: find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: php bin/quality-gates.php
       - run: php bin/compile-mo.php languages/wordpress-news-bot-tr_TR.po /tmp/wordpress-news-bot-tr_TR.mo && cmp /tmp/wordpress-news-bot-tr_TR.mo languages/wordpress-news-bot-tr_TR.mo
-      - run: mkdir -p dist && php bin/build-release.php 0.4.0-rc.2 "$PWD" "$PWD/dist/wordpress-news-bot-0.4.0-rc.2.zip"
+      - run: mkdir -p dist && php bin/build-release.php 0.4.0-rc.3 "$PWD" "$PWD/dist/wordpress-news-bot-0.4.0-rc.3.zip"
       - name: Build historical upgrade packages
         run: |
           set -euo pipefail
           for row in '0.3.0 ffa89515c233df681572c41204bedef6adaf9907' '0.3.1 c7e5d5b6614e6b7a9c0116ce6f3d1b7aa8e85002' '0.3.2 9513c3d416c5f0b832623e6a4867e9d51ca99fc0' '0.3.3 80b6fc4abfcbe88233a8cda2e4b9d71896ebc982' '0.3.4 6665ec13febc70ce427522a9fdf0916375a86eff' '0.3.5 5ab7a0647a57c5755415e641ad3584622b0a10a5'; do
-            set -- $row; version=$1; ref=$2; work=$(mktemp -d); git archive --format=zip --output="$work/source.zip" "$ref"; unzip -q "$work/source.zip" -d "$work/source"; php bin/build-release.php "$version" "$work/source" "$PWD/dist/wordpress-news-bot-$version.zip"; rm -rf "$work";
+            read -r version ref <<< "$row"; work=$(mktemp -d); git archive --format=zip --output="$work/source.zip" "$ref"; unzip -q "$work/source.zip" -d "$work/source"; php bin/build-release.php "$version" "$work/source" "$PWD/dist/wordpress-news-bot-$version.zip"; rm -rf "$work";
           done
       - run: sha256sum dist/*.zip | tee dist/SHA256SUMS
       - uses: actions/upload-artifact@v4

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 if (!defined('ARRAY_A')) { define('ARRAY_A', 'ARRAY_A'); }
 if (!defined('MINUTE_IN_SECONDS')) { define('MINUTE_IN_SECONDS', 60); }
-if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.4.0-rc.2'); }
+if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.4.0-rc.3'); }
 if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '1.8.0'); }
 $GLOBALS['wpnb_test_options'] = [];
 if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags(string $v): string { return trim(strip_tags($v)); } }

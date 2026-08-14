@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 Push-Location $root
 try {
-  php bin/build-release.php 0.4.0-rc.2
+  php bin/build-release.php 0.4.0-rc.3
   composer validate --strict
   vendor/bin/phpunit --colors=never
   Get-ChildItem -Recurse -Filter *.php | Where-Object {$_.FullName -notmatch '\\vendor\\'} | ForEach-Object { php -l $_.FullName | Out-Null; if($LASTEXITCODE -ne 0){throw "PHP lint failed: $($_.FullName)"} }

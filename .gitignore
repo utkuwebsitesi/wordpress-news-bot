@@ -8,6 +8,7 @@ node_modules/
 .phpunit.result.cache
 coverage/
 /tests/e2e/results.json
+/test-results/
 /.phpunit.cache/
 /.idea/
 /.vscode/

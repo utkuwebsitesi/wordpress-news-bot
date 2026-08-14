@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.4.0-rc.2 - P0 pool, originality and source privacy gates
+## 0.4.0-rc.3 - P0 media, pool, originality and release gates
+
+- Daha önce üretilen `0.4.0-rc.2` paketinin değişmezliği korunarak bu içerik yeni `0.4.0-rc.3` adayına taşındı.
 
 - Atom/RSS görsel adayları `media:content`, `media:thumbnail`, görsel enclosure ve içerikteki ilk `img` önceliğiyle ayrıştırılır; isteğe bağlı `og:image` kontrolü gelişmiş kaynak ayarına bağlandı.
 - Görseller WordPress Ortam Kütüphanesine SSRF, DNS, redirect, response-size, gerçek JPEG/PNG/WebP MIME ve minimum ölçü kontrolleriyle indirilir; HTML, SVG, sahte MIME ve özel IP hedefleri reddedilir.

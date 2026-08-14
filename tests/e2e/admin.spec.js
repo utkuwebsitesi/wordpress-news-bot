@@ -132,8 +132,8 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
   });
 
   test("adds two verified sources and exposes source and bulk fetch actions", async () => {
-    await addSource(page, "NTV Spor-like Atom", "https://feed.test/sports-atom.xml");
-    await addSource(page, "NTV-like Atom", "https://feed.test/news-atom.xml");
+    await addSource(page, "NTV Spor-like Atom", "https://example.com/sports-atom.xml");
+    await addSource(page, "NTV-like Atom", "https://example.com/news-atom.xml");
     await expect(page.locator(".wpnb-sources-table")).toContainText(
       "NTV Spor-like Atom",
     );
@@ -165,7 +165,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       .getByRole("button", { name: "Activate" })
       .click();
     await page.locator("#wpnb-source-name").fill("Duplicate fixture");
-    await page.locator("#wpnb-feed-url").fill("https://feed.test/sports-atom.xml");
+    await page.locator("#wpnb-feed-url").fill("https://example.com/sports-atom.xml");
     await page.getByRole("button", { name: "Save Source" }).click();
     await expect(page.locator(".notice-error.is-dismissible")).toContainText(
       "already registered",
@@ -273,8 +273,8 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       expect(draft.thumbnail_alt).toBe(draft.title);
       expect(draft.thumbnail_caption).toBe("");
       expect(draft.thumbnail_content).toBe("");
-      expect(draft.content).not.toContain("feed.test/images");
-      expect(draft.thumbnail_alt).not.toContain("feed.test/images");
+      expect(draft.content).not.toContain("example.com/images");
+      expect(draft.thumbnail_alt).not.toContain("example.com/images");
     }
     await page.goto(`/wp-admin/post.php?post=${featuredDrafts[0].id}&action=edit`);
     const featuredPanel = page.getByRole('button', { name: /Featured image/i }).first();
@@ -318,7 +318,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     });
     await page.goto("/wp-admin/admin.php?page=wpnb-sources#wpnb-source-form");
     await page.locator("#wpnb-source-name").fill("Broken fixture");
-    await page.locator("#wpnb-feed-url").fill("https://feed.test/broken");
+    await page.locator("#wpnb-feed-url").fill("https://example.com/broken");
     await page.getByRole("button", { name: "Test Before Saving" }).click();
     await expect(page.locator(".notice-error.is-dismissible")).toBeVisible();
     db = await state(page);
@@ -344,7 +344,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(db.draft_statuses).toEqual(["draft", "draft", "draft", "draft"]);
     expect(db.category_links).toBe(46);
     console.log(
-      `P0 media evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} featured_drafts=${db.draft_records.filter((draft) => draft.thumbnail_id > 0).length} drafts=${db.drafts} cron_disabled=${db.cron_disabled}`,
+      `P0 media evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} attachment_ids=${db.media.map((item) => item.id).join(",")} featured_drafts=${db.draft_records.filter((draft) => draft.thumbnail_id > 0).length} thumbnail_ids=${db.draft_records.filter((draft) => draft.thumbnail_id > 0).map((draft) => draft.thumbnail_id).join(",")} drafts=${db.drafts} cron_disabled=${db.cron_disabled}`,
     );
   });
 
