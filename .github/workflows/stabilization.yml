@@ -98,7 +98,7 @@ jobs:
       - run: find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: php bin/quality-gates.php
       - run: php bin/compile-mo.php languages/wordpress-news-bot-tr_TR.po /tmp/wordpress-news-bot-tr_TR.mo && cmp /tmp/wordpress-news-bot-tr_TR.mo languages/wordpress-news-bot-tr_TR.mo
-      - run: mkdir -p dist && php bin/build-release.php 0.4.0-rc.1 "$PWD" "$PWD/dist/wordpress-news-bot-0.4.0-rc.1.zip"
+      - run: mkdir -p dist && php bin/build-release.php 0.4.0-rc.2 "$PWD" "$PWD/dist/wordpress-news-bot-0.4.0-rc.2.zip"
       - name: Build historical upgrade packages
         run: |
           set -euo pipefail

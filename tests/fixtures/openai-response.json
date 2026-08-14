@@ -4,7 +4,7 @@
       "content": [
         {
           "type": "output_text",
-          "text": "{\"title\":\"Deterministic draft\",\"excerpt\":\"Deterministic excerpt\",\"content_html\":\"<p>Deterministic safe content.</p>\",\"suggested_tags\":[\"fixture\"],\"seo_title\":\"Deterministic SEO\",\"seo_description\":\"Deterministic description\"}"
+          "text": "{\"title\":\"Fixture olayındaki gelişmeler yeniden değerlendirildi\",\"excerpt\":\"Fixture olayına ilişkin doğrulanmış ayrıntılar bağımsız ve açık bir haber özetiyle yeniden aktarıldı.\",\"content_html\":\"<p>Yetkililer gelişmeyle ilgili mevcut verileri yeniden değerlendirdi ve kamuoyuna doğrulanmış ayrıntıları aktardı. Sürecin farklı yönleri dikkatle incelenirken ilgili kurumların çalışmalarını sürdürdüğü bildirildi. Yeni açıklamaların resmi kontroller tamamlandıktan sonra paylaşılacağı, mevcut bilgilerin ise bağımsız bir haber diliyle ele alındığı belirtildi.</p>\",\"suggested_tags\":[\"fixture\"],\"seo_title\":\"Fixture gelişmesinin ayrıntıları\",\"seo_description\":\"Doğrulanmış ayrıntılar ve süreçteki son durum bağımsız haber diliyle aktarıldı.\"}"
         }
       ]
     }

@@ -75,7 +75,7 @@ function validateRelease(string $archive, string $root, string $required,string$
         if (!str_starts_with($entry, $root . '/')) {
             throw new RuntimeException('ZIP entry is outside the plugin root: ' . $entry);
         }
-        if (preg_match('~(^|/)(?:\.git|\.github|\.tmp-history-build|tests|node_modules|coverage|cache|src|\.env(?:\..*)?)(?:/|$)~i', $entry) || preg_match('~/(?:composer\.(?:json|lock)|package(?:-lock)?\.json|playwright\.config\.js|phpunit\.xml\.dist)$~i',$entry) || str_ends_with(strtolower($entry), '.zip')) {
+        if (preg_match('~(^|/)(?:\.git|\.github|\.tmp-history-build|tests|dist|node_modules|coverage|cache|src|\.env(?:\..*)?)(?:/|$)~i', $entry) || preg_match('~/(?:composer\.(?:json|lock)|package(?:-lock)?\.json|playwright\.config\.js|phpunit\.xml\.dist)$~i',$entry) || str_ends_with(strtolower($entry), '.zip')) {
             throw new RuntimeException('Development or generated file found in release ZIP: ' . $entry);
         }
         $parts = explode('/', $entry);
@@ -109,7 +109,7 @@ function validateRelease(string $archive, string $root, string $required,string$
         if (!is_file($mainFile)) {
             throw new RuntimeException('Extracted main plugin file was not found.');
         }
-        $header=(string)file_get_contents($mainFile);$requiredHeaders=['Plugin Name'=>'WordPress News Bot','Text Domain'=>'wordpress-news-bot'];if($expectedVersion!=='')$requiredHeaders['Version']=$expectedVersion;if($expectedVersion==='0.4.0-rc.1')$requiredHeaders['Author']='Utkuweb';foreach($requiredHeaders as$name=>$expected){if(!preg_match('/^ \* '.preg_quote($name,'/').':\s*(.+)$/m',$header,$match)||trim($match[1])!==$expected)throw new RuntimeException('Plugin header mismatch: '.$name);}
+        $header=(string)file_get_contents($mainFile);$requiredHeaders=['Plugin Name'=>'WordPress News Bot','Text Domain'=>'wordpress-news-bot','Author'=>'Utkuweb'];if($expectedVersion!=='')$requiredHeaders['Version']=$expectedVersion;foreach($requiredHeaders as$name=>$expected){if(!preg_match('/^ \* '.preg_quote($name,'/').':\s*(.+)$/m',$header,$match)||trim($match[1])!==$expected)throw new RuntimeException('Plugin header mismatch: '.$name);}
     } finally {
         removeTree($extractRoot);
     }

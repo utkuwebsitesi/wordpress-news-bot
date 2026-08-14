@@ -14,7 +14,7 @@ if (( ready == 0 )); then "${compose[@]}" logs wordpress; exit 1; fi
 "${compose[@]}" exec -T wordpress curl --fail --silent --show-error --cacert /certs/ca.crt -H 'Authorization: Bearer fixture-secret-key' -H 'Content-Type: application/json' --data '{}' https://openai.test/v1/responses >/dev/null
 "${compose[@]}" exec -T wordpress wp eval 'if(!function_exists("sodium_crypto_secretbox")&&!function_exists("openssl_encrypt"))throw new RuntimeException("OpenAI secret encryption is unavailable.");' --allow-root
 export WPNB_BASE_URL="http://127.0.0.1:${WPNB_HTTP_PORT:-8080}"
-export WPNB_ZIP_PATH="${WPNB_ARTIFACTS_DIR}/wordpress-news-bot-0.4.0-rc.1.zip"
+export WPNB_ZIP_PATH="${WPNB_ARTIFACTS_DIR}/wordpress-news-bot-0.4.0-rc.2.zip"
 npm ci
 npx playwright install --with-deps chromium
 npx playwright test

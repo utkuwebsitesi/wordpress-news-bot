@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0-rc.2 - P0 pool, originality and source privacy gates
+
+- Haber Havuzuna sayfadaki tüm uygun kayıtları veya etkin filtreyle eşleşen en fazla 500 kaydı sunucuda yeniden hesaplayarak seçme desteği eklendi.
+- AI taslağı oluşturma, kuyruğa alma ve havuzdan silme işlemleri kullanıcı bazlı kilit, işlem limiti, uygun durum kontrolü ve başarılı/atlanan/başarısız özetiyle tek toplu akışta birleştirildi.
+- OpenAI strict JSON Schema ve `store: false` korumalarına başlık özgünlüğü, 12 kelimelik kaynak pasajı, kaynak URL'si ve minimum içerik kalitesi denetimleri eklendi; uygunsuz çıktı yalnızca bir kez yeniden denenir.
+- Yeni taslaklardan görünür kaynak altbilgisi kaldırıldı; kaynak ve AI ilişkisi yalnızca `_wpnb_` korumalı post meta alanlarında saklanır.
+- Yalnızca eklentinin halen taslak durumundaki içeriklerinde eski kaynak bloğunu hedefleyen, yönetici onaylı bakım aracı eklendi; yayımlanmış ve ilişkisiz içerikler değiştirilmez.
+- Gerçek ZIP E2E kabulü 40 kayıt seçimi, üç güvenli taslak, özgün başlık, görünür kaynak yokluğu, korumalı metadata, duplicate koruması ve kapalı WP-Cron kanıtlarıyla genişletildi.
+- Bu sürüm release candidate'dır; production deploy ve stable `0.4.0` etiketi içermez.
+
 ## 0.4.0-rc.1 - Stabilization and release candidate gates
 
 - Kaynak satırından veya tüm aktif kaynaklardan POST, nonce, capability, global/kaynak kilidi ve batch korumalı manuel haber çekme eklendi; bu akış WP-Cron kapalıyken de çalışır.

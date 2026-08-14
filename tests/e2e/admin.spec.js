@@ -205,6 +205,13 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator(".wpnb-pool-table")).toContainText(
       "Atom fixture item 1",
     );
+    const allChecks = page.locator('.wpnb-pool-check');
+    await expect(allChecks).toHaveCount(40);
+    await page.locator('#wpnb-select-page').check();
+    await expect(page.locator('#wpnb-selection-status')).toContainText('40');
+    expect(await allChecks.evaluateAll((boxes) => boxes.every((box) => box.checked))).toBe(true);
+    await page.locator('#wpnb-clear-selection').click();
+    expect(await allChecks.evaluateAll((boxes) => boxes.every((box) => !box.checked))).toBe(true);
     const firstDraftForm = page
       .locator("form:has(button.wpnb-create-draft)")
       .first();
@@ -225,17 +232,30 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     db = await state(page);
     expect(db.drafts).toBe(1);
     await page.goto("/wp-admin/admin.php?page=wpnb-pool");
-    const checks = page.locator(
-      '#wpnb-draft-bulk + table input[name="item_ids[]"]',
-    );
+    const checks = page.locator('.wpnb-pool-check');
     await checks.nth(0).check();
     await checks.nth(1).check();
+    await page.locator('#wpnb-pool-action').selectOption('draft');
     await page
-      .getByRole("button", { name: "Create Drafts from Selected" })
+      .getByRole("button", { name: "Apply" })
       .click();
     db = await state(page);
     expect(db.drafts).toBe(3);
     expect(new Set(db.draft_feed_ids).size).toBe(3);
+    for (const draft of db.draft_records) {
+      expect(draft.title.toLocaleLowerCase('tr')).not.toBe(draft.source_title.toLocaleLowerCase('tr'));
+      expect(draft.content).not.toMatch(/(?:Source:|Kaynak:|feed\.test|original)/i);
+      const sourceBlock = draft.source_excerpt.split(/\s+/).slice(0, 12).join(' ');
+      expect(sourceBlock.split(/\s+/).length).toBeGreaterThanOrEqual(12);
+      expect(draft.content.toLocaleLowerCase('tr')).not.toContain(sourceBlock.toLocaleLowerCase('tr'));
+      expect(draft.source_id).toBeGreaterThan(0);
+      expect(draft.source_url).toContain('https://feed.test/');
+      expect(draft.feed_item_id).toBeGreaterThan(0);
+      expect(draft.content_hash).toHaveLength(64);
+      expect(draft.ai_provider).toBe('openai');
+      expect(draft.ai_model).toBe('fixture-model');
+      expect(draft.generated_at).not.toBe('');
+    }
     await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
       headers: { "x-wpnb-test": "1" },
       data: { enabled: true },
@@ -313,7 +333,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
     await page.goto("/wp-admin/edit.php?post_status=draft&post_type=post");
     await expect(page.locator("#the-list")).toContainText(
-      "Deterministic draft",
+      "Fixture olayındaki gelişmeler yeniden değerlendirildi",
     );
   });
 });

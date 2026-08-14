@@ -15,8 +15,9 @@ final class OpenAiProvider implements AiProvider
     public function generate(array $item): array
     {
         if ($this->apiKey === '') throw new \RuntimeException(__('The OpenAI API key is not configured.', 'wordpress-news-bot'));
-        $source = "Başlık: " . (string)($item['title']??'') . "\nÖzet: " . (string)($item['excerpt']??'') . "\nKaynak adı: " . (string)($item['source_name']??'') . "\nKaynak URL: " . (string)($item['source_url']??'');
-        $result = $this->request($source, false); unset($result['_request_id'],$result['_http_class']); return AiResponseValidator::validate($result);
+        $source="GÜVENİLMEYEN RSS VERİSİ\nBaşlık: ".(string)($item['title']??'')."\nÖzet: ".(string)($item['excerpt']??'');$last=null;
+        for($attempt=1;$attempt<=2;$attempt++){try{$instruction=$attempt===1?'Bu verideki doğrulanabilir olguları koruyarak başlığı, girişi ve haber metnini doğal Türkçe haber diliyle özgün biçimde yeniden yaz. Kaynak cümlelerini art arda kopyalama, kaynak URL veya bot açıklaması ekleme, yeni bilgi ya da alıntı uydurma.':'Önceki çıktı kalite denetimini geçmedi. Aynı doğrulanabilir olguları koru; tamamen farklı bir başlık ve cümle yapısıyla, en az 25 kelimelik kullanılabilir bir Türkçe haber metni üret. Kaynak URL, atıf veya süreç açıklaması ekleme.';$result=$this->request($instruction."\n\n".$source,false);unset($result['_request_id'],$result['_http_class']);$validated=AiResponseValidator::validate($result);AiOriginalityValidator::assertValid($validated,$item);return$validated;}catch(AiOutputRejectedException$e){$last=$e;}}
+        throw new AiOutputRejectedException(__('The AI output did not meet originality and quality requirements after two attempts. No draft was created.','wordpress-news-bot'),0,$last);
     }
     private function request(string $input, bool $test): array
     {
@@ -33,10 +34,10 @@ final class OpenAiProvider implements AiProvider
         if(!is_array($data)) throw new \RuntimeException(__('The OpenAI response could not be read.', 'wordpress-news-bot'));
         $requestId=function_exists('wp_remote_retrieve_header')?sanitize_text_field((string)wp_remote_retrieve_header($response,'x-request-id')):'';
         foreach(($data['output']??[]) as $output) foreach(($output['content']??[]) as $content){
-            if(($content['type']??'')==='refusal') throw new \RuntimeException(__('The model refused the connection test.', 'wordpress-news-bot'));
+            if(($content['type']??'')==='refusal') throw new AiOutputRejectedException(__('The model refused to generate the requested draft.', 'wordpress-news-bot'));
             if(($content['type']??'')==='output_text'){ $decoded=json_decode((string)($content['text']??''),true); if(is_array($decoded)) return $decoded+['_request_id'=>$requestId,'_http_class'=>(int)floor($code/100)]; }
         }
         if(isset($data['output_text'])){ $decoded=json_decode((string)$data['output_text'],true); if(is_array($decoded)) return $decoded+['_request_id'=>$requestId,'_http_class'=>(int)floor($code/100)]; }
-        throw new \RuntimeException(__('OpenAI did not return valid structured output.', 'wordpress-news-bot'));
+        throw new AiOutputRejectedException(__('OpenAI did not return valid structured output.', 'wordpress-news-bot'));
     }
 }
