@@ -6,7 +6,7 @@ services:
       sh -c "apk add --no-cache openssl >/dev/null &&
       test -f /certs/ca.crt ||
       (openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj /CN=WPNB-Test-CA -keyout /certs/ca.key -out /certs/ca.crt &&
-      openssl req -newkey rsa:2048 -nodes -subj /CN=feed.test -addext subjectAltName=DNS:feed.test,DNS:www.feed.test,DNS:openai.test -keyout /certs/server.key -out /certs/server.csr &&
+      openssl req -newkey rsa:2048 -nodes -subj /CN=example.com -addext subjectAltName=DNS:example.com,DNS:www.example.com,DNS:example.org -keyout /certs/server.key -out /certs/server.csr &&
       openssl x509 -req -in /certs/server.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -days 2 -copy_extensions copy -out /certs/server.crt)"
   db:
     image: mariadb:10.11
@@ -30,6 +30,16 @@ services:
       }
   mock:
     image: nginx:1.29-alpine
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        cp -r /fixtures /tmp/fixtures &&
+        base64 -d /fixtures/image.png.b64 > /tmp/fixtures/image-1.png &&
+        cp /tmp/fixtures/image-1.png /tmp/fixtures/image-2.png && printf a >> /tmp/fixtures/image-2.png &&
+        cp /tmp/fixtures/image-1.png /tmp/fixtures/image-3.png && printf b >> /tmp/fixtures/image-3.png &&
+        cp /tmp/fixtures/image-1.png /tmp/fixtures/image-large.png && dd if=/dev/zero bs=1024 count=80 >> /tmp/fixtures/image-large.png 2>/dev/null &&
+        exec nginx -g 'daemon off;'
     depends_on: { certs: { condition: service_completed_successfully } }
     volumes:
       - certs:/certs:ro
@@ -65,9 +75,9 @@ services:
       WORDPRESS_CONFIG_EXTRA: "define('WP_DEBUG_LOG', true); define('WP_DEBUG_DISPLAY', false); define('SCRIPT_DEBUG', true); define('DISABLE_WP_CRON', true); if (defined('WP_CLI') && WP_CLI && empty($$_SERVER['HTTP_HOST'])) $$_SERVER['HTTP_HOST'] = 'localhost';"
     extra_hosts:
       [
-        "feed.test:93.184.216.34",
-        "www.feed.test:93.184.216.34",
-        "openai.test:93.184.216.34",
+        "example.com:93.184.216.34",
+        "www.example.com:93.184.216.34",
+        "example.org:93.184.216.34",
       ]
     volumes:
       - wordpress:/var/www/html

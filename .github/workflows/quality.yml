@@ -1,0 +1,37 @@
+name: Continuous quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: { contents: read }
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-equivalent:
+    name: Lint, unit tests, security and ZIP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          {
+            php-version: "8.3",
+            extensions: "dom,fileinfo,libxml,mbstring,simplexml,sodium,zip",
+            coverage: none,
+          }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer validate --strict
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=high
+      - run: find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: vendor/bin/phpunit --colors=never
+      - run: php bin/quality-gates.php
+      - run: php bin/compile-mo.php languages/wordpress-news-bot-tr_TR.po /tmp/wordpress-news-bot-tr_TR.mo && cmp /tmp/wordpress-news-bot-tr_TR.mo languages/wordpress-news-bot-tr_TR.mo
+      - run: mkdir -p dist && php bin/build-release.php 0.4.0-rc.3 "$PWD" "$PWD/dist/wordpress-news-bot-0.4.0-rc.3.zip"

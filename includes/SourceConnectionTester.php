@@ -18,7 +18,7 @@ final class SourceConnectionTester
                 if (!empty($record['ip'])) $ips[] = $record['ip'];
                 if (!empty($record['ipv6'])) $ips[] = $record['ipv6'];
             }
-            if (!$ips) foreach (@gethostbynamel($host) ?: [] as $ip) $ips[] = $ip;
+            foreach (@gethostbynamel($host) ?: [] as $ip) $ips[] = $ip;
             return array_values(array_unique($ips));
         };
     }

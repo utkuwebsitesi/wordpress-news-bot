@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL='*'
 compose=(docker compose -f tests/infra/compose.yml -p "${WPNB_PROJECT:-wpnb-e2e}")
 cleanup(){ "${compose[@]}" down -v --remove-orphans >/dev/null 2>&1 || true; }
 trap cleanup EXIT
@@ -11,10 +13,10 @@ for _ in {1..60}; do
 done
 if (( ready == 0 )); then "${compose[@]}" logs wordpress; exit 1; fi
 "${compose[@]}" exec -T wordpress sh -c 'mkdir -p wp-content/mu-plugins && cp /integration/wpnb-test-mu.php wp-content/mu-plugins/wpnb-test-mu.php && chown -R www-data:www-data wp-content'
-"${compose[@]}" exec -T wordpress curl --fail --silent --show-error --cacert /certs/ca.crt -H 'Authorization: Bearer fixture-secret-key' -H 'Content-Type: application/json' --data '{}' https://openai.test/v1/responses >/dev/null
+"${compose[@]}" exec -T wordpress curl --fail --silent --show-error --cacert /certs/ca.crt -H 'Authorization: Bearer fixture-secret-key' -H 'Content-Type: application/json' --data '{}' https://example.org/v1/responses >/dev/null
 "${compose[@]}" exec -T wordpress wp eval 'if(!function_exists("sodium_crypto_secretbox")&&!function_exists("openssl_encrypt"))throw new RuntimeException("OpenAI secret encryption is unavailable.");' --allow-root
 export WPNB_BASE_URL="http://127.0.0.1:${WPNB_HTTP_PORT:-8080}"
-export WPNB_ZIP_PATH="${WPNB_ARTIFACTS_DIR}/wordpress-news-bot-0.4.0-rc.2.zip"
+export WPNB_ZIP_PATH="${WPNB_ARTIFACTS_DIR}/wordpress-news-bot-0.4.0-rc.3.zip"
 npm ci
 npx playwright install --with-deps chromium
 npx playwright test

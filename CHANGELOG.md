@@ -1,7 +1,15 @@
 # Changelog
 
-## 0.4.0-rc.2 - P0 pool, originality and source privacy gates
+## 0.4.0-rc.3 - P0 media, pool, originality and release gates
 
+- Daha önce üretilen `0.4.0-rc.2` paketinin değişmezliği korunarak bu içerik yeni `0.4.0-rc.3` adayına taşındı.
+
+- Atom/RSS görsel adayları `media:content`, `media:thumbnail`, görsel enclosure ve içerikteki ilk `img` önceliğiyle ayrıştırılır; isteğe bağlı `og:image` kontrolü gelişmiş kaynak ayarına bağlandı.
+- Görseller WordPress Ortam Kütüphanesine SSRF, DNS, redirect, response-size, gerçek JPEG/PNG/WebP MIME ve minimum ölçü kontrolleriyle indirilir; HTML, SVG, sahte MIME ve özel IP hedefleri reddedilir.
+- Kaynak URL hash'i ve gerçek dosya hash'i duplicate attachment oluşmasını engeller; attachment ve haber ilişkisi yalnızca korumalı `_wpnb_` meta alanlarında tutulur.
+- Başarılı medya kaydı taslağa `_thumbnail_id` ile bağlanır; alt metin özgünleştirilmiş başlıktan üretilir, caption ve içerik boş bırakılır, görsel hatası varsayılan olarak taslak oluşumunu durdurmaz.
+- Haber Havuzuna yerel küçük önizleme, `Hazır`/`Bulunamadı`/`Hatalı` durumu, görselsiz filtre ve tekli/toplu görsel yeniden çekme işlemleri eklendi.
+- Gerçek WordPress + MariaDB E2E kapısı iki Atom kaynağı, üç gerçek media attachment, üç featured-image taslağı, duplicate koruması ve bozuk/büyük/sahte MIME/redirect/özel IP senaryolarıyla genişletildi; kapı geçmeden bu aday hazır sayılmaz.
 - Haber Havuzuna sayfadaki tüm uygun kayıtları veya etkin filtreyle eşleşen en fazla 500 kaydı sunucuda yeniden hesaplayarak seçme desteği eklendi.
 - AI taslağı oluşturma, kuyruğa alma ve havuzdan silme işlemleri kullanıcı bazlı kilit, işlem limiti, uygun durum kontrolü ve başarılı/atlanan/başarısız özetiyle tek toplu akışta birleştirildi.
 - OpenAI strict JSON Schema ve `store: false` korumalarına başlık özgünlüğü, 12 kelimelik kaynak pasajı, kaynak URL'si ve minimum içerik kalitesi denetimleri eklendi; uygunsuz çıktı yalnızca bir kez yeniden denenir.

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WordPress News Bot
  * Description: Güvenli RSS/Atom haber havuzu ve editör kontrollü içerik hazırlama altyapısı.
- * Version: 0.4.0-rc.2
+ * Version: 0.4.0-rc.3
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Utkuweb
@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) { exit; }
 
-define('WPNB_VERSION', '0.4.0-rc.2');
-define('WPNB_SCHEMA_VERSION', '1.7.0');
+define('WPNB_VERSION', '0.4.0-rc.3');
+define('WPNB_SCHEMA_VERSION', '1.8.0');
 define('WPNB_FILE', __FILE__);
 define('WPNB_DIR', plugin_dir_path(__FILE__));
 
@@ -28,6 +28,10 @@ require_once WPNB_DIR . 'includes/DatabaseRepair.php';
 require_once WPNB_DIR . 'includes/SourceUrl.php';
 require_once WPNB_DIR . 'includes/Database.php';
 require_once WPNB_DIR . 'includes/FeedParser.php';
+require_once WPNB_DIR . 'includes/RemoteAssetException.php';
+require_once WPNB_DIR . 'includes/RemoteAssetFetcher.php';
+require_once WPNB_DIR . 'includes/ImageValidator.php';
+require_once WPNB_DIR . 'includes/ImageImportService.php';
 require_once WPNB_DIR . 'includes/Security.php';
 require_once WPNB_DIR . 'includes/DuplicateDetector.php';
 require_once WPNB_DIR . 'includes/AiProvider.php';

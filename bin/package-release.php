@@ -75,7 +75,7 @@ function validateRelease(string $archive, string $root, string $required,string$
         if (!str_starts_with($entry, $root . '/')) {
             throw new RuntimeException('ZIP entry is outside the plugin root: ' . $entry);
         }
-        if (preg_match('~(^|/)(?:\.git|\.github|\.tmp-history-build|tests|dist|node_modules|coverage|cache|src|\.env(?:\..*)?)(?:/|$)~i', $entry) || preg_match('~/(?:composer\.(?:json|lock)|package(?:-lock)?\.json|playwright\.config\.js|phpunit\.xml\.dist)$~i',$entry) || str_ends_with(strtolower($entry), '.zip')) {
+        if (preg_match('~(^|/)(?:\.git|\.github|\.tmp-history-build|tests|test-results|dist|node_modules|coverage|cache|src|\.env(?:\..*)?)(?:/|$)~i', $entry) || preg_match('~/(?:composer\.(?:json|lock)|package(?:-lock)?\.json|playwright\.config\.js|phpunit\.xml\.dist)$~i',$entry) || str_ends_with(strtolower($entry), '.zip')) {
             throw new RuntimeException('Development or generated file found in release ZIP: ' . $entry);
         }
         $parts = explode('/', $entry);
