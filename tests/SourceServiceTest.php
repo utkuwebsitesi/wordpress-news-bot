@@ -69,7 +69,7 @@ final class FakeSourceDb
 {
     public string $prefix='wp_'; public int $insert_id=10; public int $last_errno=0; public string $last_error=''; public int $duplicateId=0; public bool $failInsertAsDuplicate=false; public bool $failInsertDatabase=false; public array $queries=[]; public array $lastInsertData=[]; public ?array $row=null;
     public function prepare(string $sql, mixed ...$values): string { foreach($values as$value){$replacement=is_int($value)?(string)$value:"'".str_replace("'","''",(string)$value)."'";$sql=preg_replace('/%[ds]/',$replacement,$sql,1)??$sql;}return $sql; }
-    public function get_var(string $sql): int { if(str_contains($sql,'canonical_hash'))return $this->duplicateId;if(str_contains($sql,"status IN ('new','review')"))return 2;if(str_contains($sql,"status NOT IN"))return 4;if(str_contains($sql,"status='draft_created'"))return 1;if(str_contains($sql,'locked_at'))return 0;return 0; }
+    public function get_var(string $sql): int { if(str_contains($sql,'canonical_hash'))return $this->duplicateId;if(str_contains($sql,"status IN ('new','review')"))return 2;if(str_contains($sql,"status NOT IN"))return 4;if(str_contains($sql,"status='processed'"))return 1;if(str_contains($sql,'locked_at'))return 0;return 0; }
     public function get_row(string $sql, mixed $format=null): ?array { return $this->row; }
     public function get_col(string $sql): array { return [11,12]; }
     public function insert(string $table,array $data): bool { if($this->failInsertAsDuplicate){$this->last_error='Duplicate entry';return false;}if($this->failInsertDatabase){$this->last_error='Unknown column';$this->last_errno=1054;return false;}$this->lastInsertData=$data;return true; }

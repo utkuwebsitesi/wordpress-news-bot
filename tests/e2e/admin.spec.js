@@ -172,7 +172,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
   });
 
-  test("fetches 20 plus 20 items idempotently with cron disabled and creates safe single and bulk drafts", async () => {
+  test("publishes safely, removes processed news from the default pool, and preserves duplicate history with cron disabled", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
     const sportsRow = page.locator("tr", { hasText: "NTV Spor-like Atom" });
     await sportsRow
@@ -236,86 +236,92 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(await allChecks.evaluateAll((boxes) => boxes.every((box) => box.checked))).toBe(true);
     await page.locator('#wpnb-clear-selection').click();
     expect(await allChecks.evaluateAll((boxes) => boxes.every((box) => !box.checked))).toBe(true);
-    const firstDraftForm = page
-      .locator("form:has(button.wpnb-create-draft)")
-      .first();
+    expect(db.publication_mode).toBe("publish");
+    const firstDraftForm = page.locator("tr:has(td img) form:has(button.wpnb-create-draft)").first();
     const nonce = await firstDraftForm
       .locator('input[name="_wpnonce"]')
       .inputValue();
     const itemId = await firstDraftForm
       .locator('input[name="item_id"]')
       .inputValue();
-    await firstDraftForm.getByRole("button", { name: "Create Draft" }).click();
-    await expect(page.locator(".notice-success.is-dismissible")).toBeVisible();
+    await firstDraftForm.getByRole("button", { name: "Create AI Post" }).click();
     db = await state(page);
-    expect(db.drafts).toBe(1);
-    expect(db.draft_statuses).toEqual(["draft"]);
+    await expect(page.locator(".notice-success.is-dismissible")).toBeVisible();
+    expect(db.published).toBe(1);
+    expect(db.drafts).toBe(0);
+    expect(db.published_records[0].feed_status).toBe("published");
+    expect(db.published_records[0].linked_post_id).toBe(db.published_records[0].id);
+    expect(db.published_records[0].thumbnail_id).toBeGreaterThan(0);
+    expect(db.published_records[0].thumbnail_mime).toBe("image/png");
+    expect(db.processed_pool).toBe(1);
+    expect(db.default_pool).toBe(39);
     await page.request.post("/wp-admin/admin-post.php", {
       form: { action: "wpnb_create_draft", item_id: itemId, _wpnonce: nonce },
     });
     db = await state(page);
-    expect(db.drafts).toBe(1);
+    expect(db.published).toBe(1);
+    expect(db.posts).toBe(1);
     await page.goto("/wp-admin/admin.php?page=wpnb-pool");
-    const checks = page.locator('.wpnb-pool-check[data-draft-eligible="1"]');
-    await checks.nth(0).check();
-    await checks.nth(1).check();
-    await page.locator('#wpnb-pool-action').selectOption('draft');
-    await page
-      .getByRole("button", { name: "Apply" })
-      .click();
+    await expect(page.locator('.wpnb-pool-check')).toHaveCount(39);
+    await page.goto("/wp-admin/admin.php?page=wpnb-pool&view=processed");
+    await expect(page.locator(".wpnb-pool-table")).toContainText("Published");
+    await expect(page.getByRole("link", { name: "View Post" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Edit in WordPress" }).first()).toBeVisible();
+    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
+      headers: { "x-wpnb-test": "1" }, data: { enabled: true },
+    });
+    await page.goto("/wp-admin/admin.php?page=wpnb-pool");
+    await page.locator("tr:has(td img)").getByRole("button", { name: "Create AI Post" }).first().click();
+    await expect(page.locator(".notice-error.is-dismissible")).toBeVisible();
     db = await state(page);
-    expect(db.drafts).toBe(3);
-    expect(new Set(db.draft_feed_ids).size).toBe(3);
-    const featuredDrafts = db.draft_records.filter((draft) => draft.thumbnail_id > 0);
-    expect(featuredDrafts).toHaveLength(3);
-    for (const draft of featuredDrafts) {
-      expect(draft.thumbnail_mime).toBe("image/png");
-      expect(draft.thumbnail_alt).toBe(draft.title);
-      expect(draft.thumbnail_caption).toBe("");
-      expect(draft.thumbnail_content).toBe("");
-      expect(draft.content).not.toContain("example.com/images");
-      expect(draft.thumbnail_alt).not.toContain("example.com/images");
+    expect(db.published).toBe(1);
+    expect(db.posts).toBe(1);
+    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
+      headers: { "x-wpnb-test": "1" }, data: { enabled: false },
+    });
+    await page.goto("/wp-admin/admin.php?page=wpnb-pool");
+    const checks = page.locator('tr:has(td img) .wpnb-pool-check[data-draft-eligible="1"]');
+    await expect(checks).toHaveCount(2);
+    await checks.nth(0).check();await checks.nth(1).check();
+    await page.locator('#wpnb-pool-action').selectOption('draft');
+    await page.getByRole("button", { name: "Apply" }).click();
+    db = await state(page);
+    expect(db.published).toBe(3);expect(db.drafts).toBe(0);expect(new Set(db.published_records.map((post) => post.feed_item_id)).size).toBe(3);
+    for (const post of db.published_records) {
+      expect(post.thumbnail_id).toBeGreaterThan(0);expect(post.thumbnail_mime).toBe("image/png");expect(post.thumbnail_alt).toBe(post.title);expect(post.thumbnail_caption).toBe("");expect(post.thumbnail_content).toBe("");expect(post.content).not.toContain("example.com/images");expect(post.content).not.toMatch(/(?:Source:|Kaynak:|https?:\/\/)/i);expect(post.linked_post_id).toBe(post.id);
     }
-    await page.goto(`/wp-admin/post.php?post=${featuredDrafts[0].id}&action=edit`);
+    await page.goto(`/wp-admin/post.php?post=${db.published_records[0].id}&action=edit`);
     const featuredPanel = page.getByRole('button', { name: /Featured image/i }).first();
     if (await featuredPanel.count()) await featuredPanel.click();
     await expect(
       page.locator('#postimagediv img, .editor-post-featured-image img, img[src*="/uploads/"]').first(),
     ).toBeVisible();
-    for (const draft of db.draft_records) {
-      expect(draft.title.toLocaleLowerCase('tr')).not.toBe(draft.source_title.toLocaleLowerCase('tr'));
-      expect(draft.content).not.toMatch(/(?:Source:|Kaynak:|feed\.test|original)/i);
-      const sourceBlock = draft.source_excerpt.split(/\s+/).slice(0, 12).join(' ');
+    for (const post of db.published_records) {
+      expect(post.title.toLocaleLowerCase('tr')).not.toBe(post.source_title.toLocaleLowerCase('tr'));
+      expect(post.content).not.toMatch(/(?:Source:|Kaynak:|feed\.test|original)/i);
+      const sourceBlock = post.source_excerpt.split(/\s+/).slice(0, 12).join(' ');
       expect(sourceBlock.split(/\s+/).length).toBeGreaterThanOrEqual(12);
-      expect(draft.content.toLocaleLowerCase('tr')).not.toContain(sourceBlock.toLocaleLowerCase('tr'));
-      expect(draft.source_id).toBeGreaterThan(0);
-      expect(draft.source_url).toContain('https://feed.test/');
-      expect(draft.feed_item_id).toBeGreaterThan(0);
-      expect(draft.content_hash).toHaveLength(64);
-      expect(draft.ai_provider).toBe('openai');
-      expect(draft.ai_model).toBe('fixture-model');
-      expect(draft.generated_at).not.toBe('');
+      expect(post.content.toLocaleLowerCase('tr')).not.toContain(sourceBlock.toLocaleLowerCase('tr'));
+      expect(post.source_id).toBeGreaterThan(0);expect(post.source_url).toContain('https://feed.test/');expect(post.feed_item_id).toBeGreaterThan(0);expect(post.content_hash).toHaveLength(64);expect(post.ai_provider).toBe('openai');expect(post.ai_model).toBe('fixture-model');expect(post.generated_at).not.toBe('');
     }
     await page.goto("/wp-admin/admin.php?page=wpnb-pool&image_status=without");
     await expect(page.locator('#wpnb-pool-action option[value="images"]')).toHaveText("Fetch images again");
-    await page.getByRole("button", { name: "Create Draft" }).first().click();
-    db = await state(page);
-    expect(db.drafts).toBe(4);
-    expect(db.draft_records.filter((draft) => draft.thumbnail_id === 0)).toHaveLength(1);
-    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
-      headers: { "x-wpnb-test": "1" },
-      data: { enabled: true },
-    });
-    await page.goto("/wp-admin/admin.php?page=wpnb-pool");
-    await page.getByRole("button", { name: "Create Draft" }).first().click();
+    await page.getByRole("button", { name: "Create AI Post" }).first().click();
     await expect(page.locator(".notice-error.is-dismissible")).toBeVisible();
     db = await state(page);
-    expect(db.feed_items).toBe(40);
-    expect(db.drafts).toBe(4);
-    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
-      headers: { "x-wpnb-test": "1" },
-      data: { enabled: false },
-    });
+    expect(db.published).toBe(3);expect(db.posts).toBe(3);expect(db.drafts).toBe(0);
+    const mode = await page.request.post("/?rest_route=/wpnb-test/v1/publication-mode", {headers:{"x-wpnb-test":"1"},data:{mode:"draft"}});expect(mode.ok()).toBeTruthy();
+    await page.goto("/wp-admin/admin.php?page=wpnb-pool&image_status=without");
+    await page.getByRole("button", { name: "Create AI Post" }).first().click();
+    db = await state(page);
+    expect(db.publication_mode).toBe("draft");expect(db.drafts).toBe(1);expect(db.draft_records[0].thumbnail_id).toBe(0);expect(db.draft_records[0].feed_status).toBe("processed");
+    const seededResponse=await page.request.post("/?rest_route=/wpnb-test/v1/seed-legacy-drafts",{headers:{"x-wpnb-test":"1"}});expect(seededResponse.ok()).toBeTruthy();const seeded=await seededResponse.json();
+    await page.goto("/wp-admin/admin.php?page=wpnb-legacy-drafts");
+    await expect(page.locator("body")).toContainText("Legacy plugin draft");await expect(page.locator("body")).not.toContainText("Foreign draft must stay private");
+    await page.locator(`input[name="post_ids[]"][value="${seeded.plugin_draft}"]`).check();await page.locator('input[name="confirm_publish"]').check();page.once("dialog",dialog=>dialog.accept());await page.getByRole("button",{name:"Publish Selected Drafts"}).click();
+    await expect(page.locator(".notice-success.is-dismissible")).toContainText("Published: 1");db=await state(page);expect(db.published).toBe(4);expect(db.drafts).toBe(1);
+    const foreign=await page.request.get(`/?rest_route=/wpnb-test/v1/post-status&id=${seeded.foreign_draft}`,{headers:{"x-wpnb-test":"1"}});expect(foreign.ok()).toBeTruthy();expect((await foreign.json()).status).toBe("draft");
+    await page.request.post("/?rest_route=/wpnb-test/v1/publication-mode", {headers:{"x-wpnb-test":"1"},data:{mode:"publish"}});
     await page.goto("/wp-admin/admin.php?page=wpnb-sources#wpnb-source-form");
     await page.locator("#wpnb-source-name").fill("Broken fixture");
     await page.locator("#wpnb-feed-url").fill("https://example.com/broken");
@@ -339,12 +345,11 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       expect(result.status).toBe(expectedStatus);
     }
     db = await state(page);
-    expect(db.feed_items).toBe(46);
-    expect(db.drafts).toBe(4);
-    expect(db.draft_statuses).toEqual(["draft", "draft", "draft", "draft"]);
-    expect(db.category_links).toBe(46);
+    expect(db.feed_items).toBe(47);
+    expect(db.published).toBe(4);expect(db.drafts).toBe(1);expect(db.draft_statuses).toEqual(["draft"]);
+    expect(db.category_links).toBe(47);
     console.log(
-      `P0 media evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} attachment_ids=${db.media.map((item) => item.id).join(",")} featured_drafts=${db.draft_records.filter((draft) => draft.thumbnail_id > 0).length} thumbnail_ids=${db.draft_records.filter((draft) => draft.thumbnail_id > 0).map((draft) => draft.thumbnail_id).join(",")} drafts=${db.drafts} cron_disabled=${db.cron_disabled}`,
+      `RC4 publication evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} attachment_ids=${db.media.map((item) => item.id).join(",")} published=${db.published} published_ids=${db.published_records.map((post) => post.id).join(",")} thumbnail_ids=${db.published_records.map((post) => post.thumbnail_id).join(",")} drafts=${db.drafts} processed_pool=${db.processed_pool} cron_disabled=${db.cron_disabled}`,
     );
   });
 
@@ -358,6 +363,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       "wpnb-setup",
       "wpnb-sources",
       "wpnb-pool",
+      "wpnb-legacy-drafts",
       "wpnb-settings",
       "wpnb-health",
     ]) {

@@ -86,7 +86,7 @@ final class SourceMaintenanceSafetyTest extends TestCase
     public function testPoolBulkAndDraftSourcePrivacyControlsArePresent():void
     {
         $admin=file_get_contents(dirname(__DIR__).'/admin/Admin.php');$draft=file_get_contents(dirname(__DIR__).'/includes/DraftService.php');$bulk=file_get_contents(dirname(__DIR__).'/includes/PoolBulkService.php');$maintenance=file_get_contents(dirname(__DIR__).'/includes/DraftMaintenanceService.php');
-        foreach(['wpnb_bulk_pool','selection_scope','filteredPoolIds','Create AI drafts','Add to queue','Delete from pool']as$value)$this->assertStringContainsString($value,$admin);
+        foreach(['wpnb_bulk_pool','selection_scope','filteredPoolIds','Create AI posts','Add to queue','Delete from pool','Processed/Published News','Publish Previously Created Drafts']as$value)$this->assertStringContainsString($value,$admin);
         foreach(['wpnb_pool_bulk_lock_','successful','skipped','failed',"['new','review','error']"]as$value)$this->assertStringContainsString($value,$bulk);
         foreach(['_wpnb_source_id','_wpnb_source_url','_wpnb_feed_item_id','_wpnb_content_hash','_wpnb_ai_provider','_wpnb_ai_model','_wpnb_generated_at']as$key)$this->assertStringContainsString($key,$draft);
         $this->assertStringNotContainsString("<strong>'.esc_html__('Source:",$draft);

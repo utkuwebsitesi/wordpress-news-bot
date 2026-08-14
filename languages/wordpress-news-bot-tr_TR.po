@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WordPress News Bot 0.4.0-rc.3\n"
+"Project-Id-Version: WordPress News Bot 0.4.0-rc.4\n"
 "Language: tr_TR\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -789,3 +789,128 @@ msgstr "Bu kaynak için taslak oluşturmadan önce geçerli bir görsel gerekir.
 
 msgid "The draft was created, but its image could not be imported safely. The post remains a draft; you can retry the image from the News Pool."
 msgstr "Taslak oluşturuldu ancak görseli güvenli biçimde içe aktarılamadı. Yazı taslak olarak kaldı; görseli Haber Havuzundan yeniden deneyebilirsiniz."
+msgid "Publish Existing Drafts"
+msgstr "Mevcut Taslakları Yayınla"
+
+msgid "Selected plugin drafts were checked and published."
+msgstr "Seçilen eklenti taslakları kontrol edildi ve yayınlandı."
+
+msgid "The pool item was removed. Existing WordPress posts were preserved."
+msgstr "Havuz kaydı kaldırıldı. Mevcut WordPress yazıları korundu."
+
+msgid "Complete the OpenAI connection before creating a post."
+msgstr "Yazı oluşturmadan önce OpenAI bağlantısını tamamlayın."
+
+msgid "The selected WordPress post was created."
+msgstr "Seçilen WordPress yazısı oluşturuldu."
+
+msgid "The post could not be created safely. No post was published."
+msgstr "Yazı güvenli biçimde oluşturulamadı. Hiçbir yazı yayınlanmadı."
+
+msgid "View Post"
+msgstr "Haberi Gör"
+
+msgid "Edit in WordPress"
+msgstr "WordPress'te Düzenle"
+
+msgid "Your settings, including publication mode, can be changed at any time."
+msgstr "Yayınlama modu dahil ayarlarınızı istediğiniz zaman değiştirebilirsiniz."
+
+msgid "Publication mode"
+msgstr "Yayınlama modu"
+
+msgid "Publish immediately"
+msgstr "Doğrudan yayınla"
+
+msgid "Create draft"
+msgstr "Taslak oluştur"
+
+msgid "News awaiting processing"
+msgstr "İşlem bekleyen haberler"
+
+msgid "Processed/Published News"
+msgstr "İşlenen/Yayınlanan Haberler"
+
+msgid "Create AI posts"
+msgstr "AI yazıları oluştur"
+
+msgid "Ready for processing"
+msgstr "İşleme hazır"
+
+msgid "Processed / Draft"
+msgstr "İşlendi / Taslak"
+
+msgid "Published"
+msgstr "Yayınlandı"
+
+msgid "Create AI Post"
+msgstr "AI Yazısı Oluştur"
+
+msgid "Publish Previously Created Drafts"
+msgstr "Önceden Oluşturulan Taslakları Yayınla"
+
+msgid "Only drafts confirmed by protected WordPress News Bot metadata are listed. Nothing is published without your explicit selection and confirmation."
+msgstr "Yalnız korumalı WordPress News Bot metalarıyla doğrulanan taslaklar listelenir. Açık seçiminiz ve onayınız olmadan hiçbir şey yayınlanmaz."
+
+msgid "No eligible plugin drafts were found."
+msgstr "Uygun eklenti taslağı bulunamadı."
+
+msgid "Publish the selected confirmed plugin drafts?"
+msgstr "Seçilen doğrulanmış eklenti taslakları yayınlansın mı?"
+
+msgid "Category"
+msgstr "Kategori"
+
+msgid "Quality"
+msgstr "Kalite"
+
+msgid "Missing"
+msgstr "Eksik"
+
+msgid "I confirm publication of only the selected drafts that pass every quality check."
+msgstr "Yalnız tüm kalite kontrollerini geçen seçili taslakların yayınlanmasını onaylıyorum."
+
+msgid "Publish Selected Drafts"
+msgstr "Seçili Taslakları Yayınla"
+
+msgid "The AI output did not meet the originality and quality checks. No public post was created."
+msgstr "AI çıktısı özgünlük ve kalite kontrollerini geçmedi. Herkese açık yazı oluşturulmadı."
+
+msgid "Published: %1$d | Skipped: %2$d | Failed: %3$d | Duplicate: %4$d | Missing image: %5$d | AI validation failed: %6$d"
+msgstr "Yayınlanan: %1$d | Atlanan: %2$d | Hatalı: %3$d | Duplicate: %4$d | Görseli eksik: %5$d | AI doğrulamasından geçmeyen: %6$d"
+
+msgid "You do not have permission to create posts."
+msgstr "Yazı oluşturma yetkiniz yok."
+
+msgid "You do not have permission to publish posts."
+msgstr "Yazı yayınlama yetkiniz yok."
+
+msgid "A WordPress category is required."
+msgstr "Bir WordPress kategorisi gereklidir."
+
+msgid "A valid featured image is required."
+msgstr "Geçerli bir öne çıkan görsel gereklidir."
+
+msgid "The WordPress post could not be prepared."
+msgstr "WordPress yazısı hazırlanamadı."
+
+msgid "The featured image could not be assigned."
+msgstr "Öne çıkan görsel atanamadı."
+
+msgid "The prepared post did not pass publication validation."
+msgstr "Hazırlanan yazı yayınlama doğrulamasını geçmedi."
+
+msgid "The post could not be published safely."
+msgstr "Yazı güvenli biçimde yayınlanamadı."
+
+msgid "Post creation failed."
+msgstr "Yazı oluşturma başarısız oldu."
+
+msgid "The post processing history could not be started."
+msgstr "Yazı işlem geçmişi başlatılamadı."
+
+msgid "The news item could not be linked to the WordPress post."
+msgstr "Haber kaydı WordPress yazısıyla ilişkilendirilemedi."
+
+msgid "The post processing history could not be completed."
+msgstr "Yazı işlem geçmişi tamamlanamadı."

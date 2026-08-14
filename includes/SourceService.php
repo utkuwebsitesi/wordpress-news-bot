@@ -98,7 +98,7 @@ final class SourceService
         return [
             'pending' => (int) $this->db->get_var($this->db->prepare("SELECT COUNT(*) FROM $table WHERE source_id=%d AND status IN ('new','review')", $sourceId)),
             'processed' => (int) $this->db->get_var($this->db->prepare("SELECT COUNT(*) FROM $table WHERE source_id=%d AND status NOT IN ('new','review')", $sourceId)),
-            'drafts' => (int) $this->db->get_var($this->db->prepare("SELECT COUNT(*) FROM $table WHERE source_id=%d AND status='draft_created'", $sourceId)),
+            'drafts' => (int) $this->db->get_var($this->db->prepare("SELECT COUNT(*) FROM $table WHERE source_id=%d AND status='processed'", $sourceId)),
             'locked' => (int) $this->db->get_var($this->db->prepare("SELECT COUNT(*) FROM $jobs j JOIN $table f ON f.id=j.feed_item_id WHERE f.source_id=%d AND (j.status IN ('running','processing') OR (j.locked_at IS NOT NULL AND j.locked_at >= %s))", $sourceId, gmdate('Y-m-d H:i:s', time() - 15 * 60))),
         ];
     }

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WordPress News Bot
  * Description: Güvenli RSS/Atom haber havuzu ve editör kontrollü içerik hazırlama altyapısı.
- * Version: 0.4.0-rc.3
+ * Version: 0.4.0-rc.4
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Utkuweb
@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) { exit; }
 
-define('WPNB_VERSION', '0.4.0-rc.3');
-define('WPNB_SCHEMA_VERSION', '1.8.0');
+define('WPNB_VERSION', '0.4.0-rc.4');
+define('WPNB_SCHEMA_VERSION', '1.9.0');
 define('WPNB_FILE', __FILE__);
 define('WPNB_DIR', plugin_dir_path(__FILE__));
 
@@ -26,6 +26,7 @@ require_once WPNB_DIR . 'includes/DatabaseEngineRepairException.php';
 require_once WPNB_DIR . 'includes/DatabaseEngineRepair.php';
 require_once WPNB_DIR . 'includes/DatabaseRepair.php';
 require_once WPNB_DIR . 'includes/SourceUrl.php';
+require_once WPNB_DIR . 'includes/ProcessedItemMigration.php';
 require_once WPNB_DIR . 'includes/Database.php';
 require_once WPNB_DIR . 'includes/FeedParser.php';
 require_once WPNB_DIR . 'includes/RemoteAssetException.php';
@@ -45,6 +46,7 @@ require_once WPNB_DIR . 'includes/Credentials.php';
 require_once WPNB_DIR . 'includes/OpenAiProvider.php';
 require_once WPNB_DIR . 'includes/ConnectionService.php';
 require_once WPNB_DIR . 'includes/SetupState.php';
+require_once WPNB_DIR . 'includes/PublicationGuard.php';
 require_once WPNB_DIR . 'includes/DraftService.php';
 require_once WPNB_DIR . 'includes/PoolBulkService.php';
 require_once WPNB_DIR . 'includes/DraftMaintenanceService.php';
@@ -56,6 +58,7 @@ require_once WPNB_DIR . 'includes/SourceConnectionTester.php';
 require_once WPNB_DIR . 'includes/SourceService.php';
 require_once WPNB_DIR . 'includes/SourceRecoveryRequired.php';
 require_once WPNB_DIR . 'includes/SourceMigration.php';
+require_once WPNB_DIR . 'includes/LegacyDraftPublisher.php';
 require_once WPNB_DIR . 'admin/Admin.php';
 require_once WPNB_DIR . 'includes/Plugin.php';
 

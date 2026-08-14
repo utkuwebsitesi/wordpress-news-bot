@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0-rc.4 - Processed pool and safe publication lifecycle
+
+- AI ile ilişkilendirilmiş WordPress yazıları idempotent migration ile `processed` veya `published` durumuna alınır; feed kayıtları, hash ve post ilişkileri korunur.
+- İşlenen haberler varsayılan havuzdan çıkarılır ve ayrı İşlenen/Yayınlanan görünümünde WordPress görüntüleme/düzenleme bağlantılarıyla sunulur.
+- Varsayılan yayınlama modu doğrudan yayındır; içerik önce taslak hazırlanır, kategori/meta/görsel/görünür kaynak kontrollerinden sonra yayınlanır.
+- Eklentinin eski taslakları yalnız korumalı `_wpnb_` metaları, kalite kontrolü, yönetici seçimi ve açık onayla yayımlanabilir.
+
 ## 0.4.0-rc.3 - P0 media, pool, originality and release gates
 
 - Daha önce üretilen `0.4.0-rc.2` paketinin değişmezliği korunarak bu içerik yeni `0.4.0-rc.3` adayına taşındı.
