@@ -8,7 +8,7 @@ final class MockAiProvider implements AiProvider
     public function testConnection(): array { return ['success'=>true,'model'=>$this->model(),'duration_ms'=>0,'request_id'=>'mock','http_class'=>2]; }
     public function generate(array $item): array
     {
-        $title = trim((string) ($item['title'] ?? 'Yeni gelişme'));
-        return ['title' => $title, 'slug' => sanitize_title($title), 'excerpt' => (string) ($item['excerpt'] ?? ''), 'content_html' => '<p>Bu içerik Phase 1 mock sağlayıcısı ile editör incelemesi için hazırlanmıştır.</p>', 'category_suggestion' => '', 'tags' => [], 'seo_title' => $title, 'meta_description' => wp_trim_words((string) ($item['excerpt'] ?? ''), 25), 'focus_keyword' => '', 'source_attribution' => '', 'factual_risk' => 'medium', 'verification_notes' => 'Yayın öncesi editör doğrulaması gerekir.', 'image_prompt' => '', 'publication_recommendation' => 'draft'];
+        $source=trim((string)($item['title']??'gelişme'));$title='Gündemdeki gelişmenin ayrıntıları netleşiyor';$content='<p>'.$source.' başlığıyla duyurulan gelişme, doğrulanabilir temel bilgiler korunarak editör incelemesine uygun yeni bir anlatımla hazırlandı. Olayın kişi, kurum, yer, tarih ve sayı bilgileri değiştirilmeden aktarılırken kaynak metindeki cümle yapıları tekrarlanmadı.</p><p>Hazırlanan taslak yalnız mevcut verilerde yer alan olguları kapsıyor. Yeni yorum, iddia veya alıntı eklenmedi ve metin yayımlanmadan önce editör kontrolüne bırakıldı.</p>';
+        return ['title'=>$title,'excerpt'=>'Gelişmenin doğrulanabilir ayrıntıları, yeni bir Türkçe haber anlatımıyla editör incelemesine hazırlandı.','content_html'=>$content,'suggested_tags'=>['gündem'],'seo_title'=>$title,'seo_description'=>'Gelişmenin doğrulanabilir ayrıntılarını içeren editör kontrollü haber taslağı.'];
     }
 }

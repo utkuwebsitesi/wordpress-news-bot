@@ -18,7 +18,7 @@ foreach (array_slice($argv, 1) as $url) {
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_TIMEOUT => 20,
             CURLOPT_ENCODING => '',
-            CURLOPT_USERAGENT => 'WordPress-News-Bot/0.4.0-rc.1',
+            CURLOPT_USERAGENT => 'WordPress-News-Bot/0.4.0-rc.2',
             CURLOPT_HTTPHEADER => ['Accept: application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.1'],
             CURLOPT_HEADERFUNCTION => static function ($curl, string $line) use (&$headers): int {
                 $parts = explode(':', $line, 2);

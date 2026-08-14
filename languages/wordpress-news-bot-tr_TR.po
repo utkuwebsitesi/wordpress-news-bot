@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WordPress News Bot 0.4.0-rc.1\n"
+"Project-Id-Version: WordPress News Bot 0.4.0-rc.2\n"
 "Language: tr_TR\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -630,3 +630,96 @@ msgstr "Bazı feed kayıtları kaydedilemedi."
 
 msgid "Operation ID: %s"
 msgstr "İşlem Kimliği: %s"
+
+msgid "The pool bulk operation was completed."
+msgstr "Haber havuzu toplu işlemi tamamlandı."
+
+msgid "Legacy source blocks were removed from confirmed plugin drafts."
+msgstr "Eski kaynak blokları doğrulanmış eklenti taslaklarından kaldırıldı."
+
+msgid "Create AI drafts"
+msgstr "AI taslakları oluştur"
+
+msgid "Add to queue"
+msgstr "Kuyruğa ekle"
+
+msgid "Delete from pool"
+msgstr "Havuzdan sil"
+
+msgid "Delete the selected pool items? Existing WordPress posts will be preserved."
+msgstr "Seçili havuz kayıtları silinsin mi? Mevcut WordPress yazıları korunacak."
+
+msgid "No news selected."
+msgstr "Haber seçilmedi."
+
+msgid "Select all %d news matching the filter."
+msgstr "Filtreyle eşleşen %d haberin tümünü seç."
+
+msgid "Clear selection"
+msgstr "Seçimi temizle"
+
+msgid "Select all news on this page"
+msgstr "Bu sayfadaki tüm haberleri seç"
+
+msgid "All %d news matching the filter are selected."
+msgstr "Filtreyle eşleşen %d haberin tümü seçildi."
+
+msgid "This page has %d selected news."
+msgstr "Bu sayfadaki %d haber seçildi."
+
+msgid "Legacy Draft Source Cleanup"
+msgstr "Eski Taslak Kaynak Temizliği"
+
+msgid "%d plugin-created draft contains a legacy visible source block."
+msgstr "Eklentinin oluşturduğu %d taslakta eski görünür kaynak bloğu bulunuyor."
+
+msgid "Only confirmed WordPress News Bot drafts are inspected. Published posts and unrelated drafts are never changed."
+msgstr "Yalnızca doğrulanmış WordPress News Bot taslakları incelenir. Yayımlanmış yazılar ve ilgisiz taslaklar hiçbir zaman değiştirilmez."
+
+msgid "I confirm removal of legacy source blocks from the listed plugin drafts."
+msgstr "Listelenen eklenti taslaklarından eski kaynak bloklarının kaldırılmasını onaylıyorum."
+
+msgid "Clean Legacy Draft Source Blocks"
+msgstr "Eski Taslak Kaynak Bloklarını Temizle"
+
+msgid "The AI output did not meet the originality and quality checks. No draft was created."
+msgstr "AI çıktısı özgünlük ve kalite denetimlerini geçemedi. Taslak oluşturulmadı."
+
+msgid "%1$d legacy draft source blocks removed, %2$d skipped."
+msgstr "%1$d eski taslak kaynak bloğu kaldırıldı, %2$d atlandı."
+
+msgid "%1$d successful, %2$d skipped, %3$d failed."
+msgstr "%1$d başarılı, %2$d atlandı, %3$d başarısız."
+
+msgid "The AI output did not meet the originality and quality checks. No invalid draft was created."
+msgstr "AI çıktısı özgünlük ve kalite denetimlerini geçemedi. Geçersiz taslak oluşturulmadı."
+
+msgid "The generated headline was not sufficiently original."
+msgstr "Üretilen başlık yeterince özgün değildi."
+
+msgid "The generated article was too short to use safely."
+msgstr "Üretilen haber güvenle kullanılamayacak kadar kısaydı."
+
+msgid "The generated article copied a long source passage."
+msgstr "Üretilen haber kaynaktan uzun bir bölümü kopyaladı."
+
+msgid "The generated article included the original source URL."
+msgstr "Üretilen haber özgün kaynak URL'sini içeriyordu."
+
+msgid "The AI response was not a JSON object."
+msgstr "AI yanıtı bir JSON nesnesi değildi."
+
+msgid "The AI response was missing a required field."
+msgstr "AI yanıtında zorunlu bir alan eksikti."
+
+msgid "The AI response did not match the required schema."
+msgstr "AI yanıtı zorunlu şemayla eşleşmedi."
+
+msgid "The AI output did not meet originality and quality requirements after two attempts. No draft was created."
+msgstr "AI çıktısı iki denemeden sonra özgünlük ve kalite gereksinimlerini karşılamadı. Taslak oluşturulmadı."
+
+msgid "The model refused to generate the requested draft."
+msgstr "Model istenen taslağı üretmeyi reddetti."
+
+msgid "Another pool bulk operation is already running."
+msgstr "Başka bir haber havuzu toplu işlemi zaten çalışıyor."
