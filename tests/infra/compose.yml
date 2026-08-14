@@ -30,6 +30,16 @@ services:
       }
   mock:
     image: nginx:1.29-alpine
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        cp -r /fixtures /tmp/fixtures &&
+        base64 -d /fixtures/image.png.b64 > /tmp/fixtures/image-1.png &&
+        cp /tmp/fixtures/image-1.png /tmp/fixtures/image-2.png && printf a >> /tmp/fixtures/image-2.png &&
+        cp /tmp/fixtures/image-1.png /tmp/fixtures/image-3.png && printf b >> /tmp/fixtures/image-3.png &&
+        cp /tmp/fixtures/image-1.png /tmp/fixtures/image-large.png && dd if=/dev/zero bs=1024 count=80 >> /tmp/fixtures/image-large.png 2>/dev/null &&
+        exec nginx -g 'daemon off;'
     depends_on: { certs: { condition: service_completed_successfully } }
     volumes:
       - certs:/certs:ro

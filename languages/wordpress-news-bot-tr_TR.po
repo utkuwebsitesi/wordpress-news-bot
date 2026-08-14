@@ -723,3 +723,69 @@ msgstr "Model istenen taslağı üretmeyi reddetti."
 
 msgid "Another pool bulk operation is already running."
 msgstr "Başka bir haber havuzu toplu işlemi zaten çalışıyor."
+
+msgid "Maximum image size in bytes"
+msgstr "Maksimum görsel boyutu (bayt)"
+
+msgid "Minimum image dimensions"
+msgstr "Minimum görsel ölçüleri"
+
+msgid "Minimum width"
+msgstr "Minimum genişlik"
+
+msgid "Minimum height"
+msgstr "Minimum yükseklik"
+
+msgid "Import news images"
+msgstr "Haber görsellerini içe aktar"
+
+msgid "Images are copied securely to the WordPress Media Library; remote images are never hotlinked."
+msgstr "Görseller güvenli biçimde WordPress Ortam Kütüphanesine kopyalanır; uzak görseller hotlink edilmez."
+
+msgid "Create a draft when no image is found"
+msgstr "Görsel bulunamazsa taslak oluştur"
+
+msgid "Check the news page og:image field"
+msgstr "Haber sayfasındaki og:image alanını kontrol et"
+
+msgid "This option visits each news article page when the feed has no image. Enable it only for trusted sources."
+msgstr "Bu seçenek, akışta görsel yoksa her haber sayfasını ziyaret eder. Yalnızca güvenilir kaynaklarda etkinleştirin."
+
+msgid "All image statuses"
+msgstr "Tüm görsel durumları"
+
+msgid "Not found"
+msgstr "Bulunamadı"
+
+msgid "Error"
+msgstr "Hatalı"
+
+msgid "News without images"
+msgstr "Görselsiz haberler"
+
+msgid "Fetch images again"
+msgstr "Görselleri Yeniden Çek"
+
+msgid "Image"
+msgstr "Görsel"
+
+msgid "Image status"
+msgstr "Görsel durumu"
+
+msgid "Fetch Image Again"
+msgstr "Görseli Yeniden Çek"
+
+msgid "The image is ready in the WordPress Media Library."
+msgstr "Görsel WordPress Ortam Kütüphanesinde hazır."
+
+msgid "No suitable image was found. The news item can still be used according to its source setting."
+msgstr "Uygun görsel bulunamadı. Haber, kaynak ayarına göre yine de kullanılabilir."
+
+msgid "The image could not be imported safely. Check the source settings and try again."
+msgstr "Görsel güvenli biçimde içe aktarılamadı. Kaynak ayarlarını kontrol edip yeniden deneyin."
+
+msgid "A valid image is required for this source before creating a draft."
+msgstr "Bu kaynak için taslak oluşturmadan önce geçerli bir görsel gerekir."
+
+msgid "The draft was created, but its image could not be imported safely. The post remains a draft; you can retry the image from the News Pool."
+msgstr "Taslak oluşturuldu ancak görseli güvenli biçimde içe aktarılamadı. Yazı taslak olarak kaldı; görseli Haber Havuzundan yeniden deneyebilirsiniz."

@@ -4,7 +4,7 @@ Current candidate: `0.4.0-rc.2`
 
 P0 manuel akış: `Kaynak ekle → Haberleri çek → Haber havuzunda incele → AI ile taslak oluştur → WordPress taslağını düzenle`. Kaynak bazlı ve toplu haber çekme işlemleri WP-Cron kapalıyken de aynı güvenli import servisini kullanır; kullanıcının WP-CLI, phpMyAdmin veya sunucu cron'una ihtiyacı yoktur.
 
-Durum: **release candidate**. Production deploy yapılmamıştır; stable `0.4.0` için gerçek pilot onayı beklenmektedir.
+Durum: **release candidate / medya P0 kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında medya dosyası, attachment kaydı ve `_thumbnail_id` birlikte doğrulanmadan `0.4.0-rc.2` hazır veya production-ready kabul edilmez.
 
 Geliştirici: **Utkuweb**
 
@@ -21,6 +21,8 @@ Geliştirici: **Utkuweb**
 0.4.0-rc.1 stabilizasyon çalışması gerçek release ZIP kurulumunu, WordPress 7.0.4/6.4 ve PHP 8.3/8.1 ortamlarını, MyISAM/InnoDB varsayılanlarını, 0.3.0–0.3.5 upgrade matrisini ve Playwright admin akışlarını kalıcı CI gate'lerine bağlar. Gerçek import artık bağlantı testiyle aynı SSRF/DNS/redirect motorunu kullanır; fiziksel şema ve yazma formatları canonical tanımdan türetilir; taslak üretimi atomik kilit ve kota rezervasyonu kullanır.
 
 0.4.0-rc.2 haber havuzuna sayfa ve filtre kapsamlı güvenli toplu seçim; AI taslak oluşturma, kuyruğa alma ve havuzdan silme işlemleri ekler. OpenAI çıktıları başlık özgünlüğü, uzun kaynak pasajı kopyası, kaynak URL'si ve minimum kullanılabilirlik açısından doğrulanır; ilk uygunsuz sonuçta yalnızca bir kez yeniden denenir. Yeni taslaklarda görünür kaynak bloğu bulunmaz, kaynak ilişkisi yalnızca korumalı post meta alanlarında tutulur. Eski eklenti taslakları için yayımlanmış içeriklere dokunmayan, yönetici onaylı bakım aracı sağlanır.
+
+Medya P0 kapsamı RSS/Atom `media:content`, `media:thumbnail`, görsel enclosure ve içerikteki ilk geçerli görsel adayını öncelik sırasıyla ayrıştırır. Görseller SSRF, DNS, redirect, gerçek MIME, boyut ve ölçü kontrollerinden sonra WordPress Ortam Kütüphanesine alınır; URL ve dosya hash'i duplicate attachment oluşmasını engeller. Kaynak bazında görsel içe aktarma, görselsiz taslak ve gelişmiş `og:image` seçenekleri; Haber Havuzunda yerel önizleme, durum, filtre ve tekli/toplu yeniden çekme işlemleri bulunur. Uzak görsel URL'si yalnızca `_wpnb_` korumalı meta alanlarında saklanır.
 
 Her WordPress sitesinde kullanılabilecek bağımsız, tema bağımsız ve güvenlik odaklı haber botu eklentisi.
 

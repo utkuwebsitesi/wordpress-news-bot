@@ -64,6 +64,11 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       .click();
     await expect(page.locator("#the-list")).toContainText("WordPress News Bot");
     await expect(page.locator("#the-list")).toContainText("Utkuweb");
+    const imageSettings = await page.request.post(
+      "/?rest_route=/wpnb-test/v1/image-settings",
+      { headers: { "x-wpnb-test": "1" } },
+    );
+    expect(imageSettings.ok()).toBeTruthy();
   });
 
   test("supports setup skip, reopen, and completion without losing settings", async () => {
@@ -127,40 +132,40 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
   });
 
   test("adds two verified sources and exposes source and bulk fetch actions", async () => {
-    await addSource(page, "Fixture RSS", "https://feed.test/rss.xml");
-    await addSource(page, "Fixture Atom", "https://feed.test/atom.xml");
+    await addSource(page, "NTV Spor-like Atom", "https://feed.test/sports-atom.xml");
+    await addSource(page, "NTV-like Atom", "https://feed.test/news-atom.xml");
     await expect(page.locator(".wpnb-sources-table")).toContainText(
-      "Fixture RSS",
+      "NTV Spor-like Atom",
     );
     await expect(page.locator(".wpnb-sources-table")).toContainText(
-      "Fixture Atom",
+      "NTV-like Atom",
     );
     await expect(
       page.getByRole("button", { name: "Fetch from All Active Sources" }),
     ).toBeVisible();
     await expect(
       page
-        .locator("tr", { hasText: "Fixture RSS" })
+        .locator("tr", { hasText: "NTV Spor-like Atom" })
         .getByRole("button", { name: "Fetch News", exact: true }),
     ).toBeVisible();
     await page
-      .locator("tr", { hasText: "Fixture Atom" })
+      .locator("tr", { hasText: "NTV-like Atom" })
       .getByRole("link", { name: "Edit", exact: true })
       .click();
-    await page.locator("#wpnb-source-name").fill("Fixture Atom edited");
+    await page.locator("#wpnb-source-name").fill("NTV-like Atom edited");
     await page.getByRole("button", { name: "Update Source" }).click();
     await expect(page.locator(".wpnb-sources-table")).toContainText(
-      "Fixture Atom edited",
+      "NTV-like Atom edited",
     );
-    const atomRow = page.locator("tr", { hasText: "Fixture Atom edited" });
+    const atomRow = page.locator("tr", { hasText: "NTV-like Atom edited" });
     await atomRow.getByRole("button", { name: "Deactivate" }).click();
     await expect(page.locator(".wpnb-sources-table")).toContainText("Inactive");
     await page
-      .locator("tr", { hasText: "Fixture Atom edited" })
+      .locator("tr", { hasText: "NTV-like Atom edited" })
       .getByRole("button", { name: "Activate" })
       .click();
     await page.locator("#wpnb-source-name").fill("Duplicate fixture");
-    await page.locator("#wpnb-feed-url").fill("https://feed.test/rss.xml");
+    await page.locator("#wpnb-feed-url").fill("https://feed.test/sports-atom.xml");
     await page.getByRole("button", { name: "Save Source" }).click();
     await expect(page.locator(".notice-error.is-dismissible")).toContainText(
       "already registered",
@@ -169,8 +174,8 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
 
   test("fetches 20 plus 20 items idempotently with cron disabled and creates safe single and bulk drafts", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
-    const rssRow = page.locator("tr", { hasText: "Fixture RSS" });
-    await rssRow
+    const sportsRow = page.locator("tr", { hasText: "NTV Spor-like Atom" });
+    await sportsRow
       .getByRole("button", { name: "Fetch News", exact: true })
       .click();
     await expect(page.locator(".notice-success.is-dismissible")).toContainText(
@@ -181,7 +186,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(db.category_links).toBe(20);
     expect(db.cron_disabled).toBe(true);
     await page
-      .locator("tr", { hasText: "Fixture RSS" })
+      .locator("tr", { hasText: "NTV Spor-like Atom" })
       .getByRole("button", { name: "Fetch News", exact: true })
       .click();
     await expect(page.locator(".notice-success.is-dismissible")).toContainText(
@@ -189,18 +194,37 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
     db = await state(page);
     expect(db.feed_items).toBe(20);
+    const mediaBeforeNews = db.media.length;
     await page
       .getByRole("button", { name: "Fetch from All Active Sources" })
       .click();
     db = await state(page);
     expect(db.feed_items).toBe(40);
     expect(db.sources).toBe(2);
+    expect(db.media).toHaveLength(3);
+    expect(db.media.length).toBeGreaterThan(mediaBeforeNews);
+    expect(db.media.every((item) => item.exists && item.real_image)).toBe(true);
+    expect(db.media.every((item) => item.mime === "image/png")).toBe(true);
+    expect(new Set(db.media.map((item) => item.hash)).size).toBe(3);
+    expect(db.image_sources.map((item) => item.image_source).sort()).toEqual(
+      ["atom:enclosure", "media:content", "media:thumbnail"],
+    );
+    await page.goto("/wp-admin/admin.php?page=wpnb-sources");
+    await page
+      .locator("tr", { hasText: "NTV-like Atom edited" })
+      .getByRole("button", { name: "Fetch News", exact: true })
+      .click();
+    await expect(page.locator(".notice-success.is-dismissible")).toContainText(
+      "20 read, 0 new, 20 duplicate",
+    );
+    db = await state(page);
+    expect(db.media).toHaveLength(3);
     expect(
       Object.values(db.engines).every((engine) => engine === "innodb"),
     ).toBe(true);
     await page.goto("/wp-admin/admin.php?page=wpnb-pool");
     await expect(page.locator(".wpnb-pool-table")).toContainText(
-      "RSS fixture item 1",
+      "News Atom item 1",
     );
     await expect(page.locator(".wpnb-pool-table")).toContainText(
       "Atom fixture item 1",
@@ -232,7 +256,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     db = await state(page);
     expect(db.drafts).toBe(1);
     await page.goto("/wp-admin/admin.php?page=wpnb-pool");
-    const checks = page.locator('.wpnb-pool-check');
+    const checks = page.locator('.wpnb-pool-check[data-draft-eligible="1"]');
     await checks.nth(0).check();
     await checks.nth(1).check();
     await page.locator('#wpnb-pool-action').selectOption('draft');
@@ -242,6 +266,22 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     db = await state(page);
     expect(db.drafts).toBe(3);
     expect(new Set(db.draft_feed_ids).size).toBe(3);
+    const featuredDrafts = db.draft_records.filter((draft) => draft.thumbnail_id > 0);
+    expect(featuredDrafts).toHaveLength(3);
+    for (const draft of featuredDrafts) {
+      expect(draft.thumbnail_mime).toBe("image/png");
+      expect(draft.thumbnail_alt).toBe(draft.title);
+      expect(draft.thumbnail_caption).toBe("");
+      expect(draft.thumbnail_content).toBe("");
+      expect(draft.content).not.toContain("feed.test/images");
+      expect(draft.thumbnail_alt).not.toContain("feed.test/images");
+    }
+    await page.goto(`/wp-admin/post.php?post=${featuredDrafts[0].id}&action=edit`);
+    const featuredPanel = page.getByRole('button', { name: /Featured image/i }).first();
+    if (await featuredPanel.count()) await featuredPanel.click();
+    await expect(
+      page.locator('#postimagediv img, .editor-post-featured-image img, img[src*="/uploads/"]').first(),
+    ).toBeVisible();
     for (const draft of db.draft_records) {
       expect(draft.title.toLocaleLowerCase('tr')).not.toBe(draft.source_title.toLocaleLowerCase('tr'));
       expect(draft.content).not.toMatch(/(?:Source:|Kaynak:|feed\.test|original)/i);
@@ -256,6 +296,12 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       expect(draft.ai_model).toBe('fixture-model');
       expect(draft.generated_at).not.toBe('');
     }
+    await page.goto("/wp-admin/admin.php?page=wpnb-pool&image_status=without");
+    await expect(page.locator('#wpnb-pool-action option[value="images"]')).toHaveText("Fetch images again");
+    await page.getByRole("button", { name: "Create Draft" }).first().click();
+    db = await state(page);
+    expect(db.drafts).toBe(4);
+    expect(db.draft_records.filter((draft) => draft.thumbnail_id === 0)).toHaveLength(1);
     await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
       headers: { "x-wpnb-test": "1" },
       data: { enabled: true },
@@ -265,7 +311,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator(".notice-error.is-dismissible")).toBeVisible();
     db = await state(page);
     expect(db.feed_items).toBe(40);
-    expect(db.drafts).toBe(3);
+    expect(db.drafts).toBe(4);
     await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", {
       headers: { "x-wpnb-test": "1" },
       data: { enabled: false },
@@ -276,12 +322,29 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.getByRole("button", { name: "Test Before Saving" }).click();
     await expect(page.locator(".notice-error.is-dismissible")).toBeVisible();
     db = await state(page);
-    expect(db.feed_items).toBe(40);
-    expect(db.drafts).toBe(3);
-    expect(db.draft_statuses).toEqual(["draft", "draft", "draft"]);
-    expect(db.category_links).toBe(40);
+    for (const [kind, expectedStatus] of [
+      ["broken", "error"],
+      ["oversized", "error"],
+      ["fake_mime", "error"],
+      ["redirect", "ready"],
+      ["private_redirect", "error"],
+      ["private_ip", "error"],
+    ]) {
+      const response = await page.request.post("/?rest_route=/wpnb-test/v1/image-test", {
+        headers: { "x-wpnb-test": "1" },
+        data: { kind },
+      });
+      expect(response.ok()).toBeTruthy();
+      const result = await response.json();
+      expect(result.status).toBe(expectedStatus);
+    }
+    db = await state(page);
+    expect(db.feed_items).toBe(46);
+    expect(db.drafts).toBe(4);
+    expect(db.draft_statuses).toEqual(["draft", "draft", "draft", "draft"]);
+    expect(db.category_links).toBe(46);
     console.log(
-      `P0 evidence: sources=${db.sources} feed_items=${db.feed_items} category_links=${db.category_links} drafts=${db.drafts} draft_statuses=${db.draft_statuses.join(",")} cron_disabled=${db.cron_disabled}`,
+      `P0 media evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} featured_drafts=${db.draft_records.filter((draft) => draft.thumbnail_id > 0).length} drafts=${db.drafts} cron_disabled=${db.cron_disabled}`,
     );
   });
 
@@ -314,14 +377,14 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await row.getByRole("link", { name: "Activate" }).click();
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
     await expect(page.locator(".wpnb-sources-table")).toContainText(
-      "Fixture RSS",
+      "NTV Spor-like Atom",
     );
   });
 
   test("deletes a source only after explicit confirmation and preserves drafts", async () => {
     await page.goto("/wp-admin/admin.php?page=wpnb-sources");
     await page
-      .locator("tr", { hasText: "Fixture Atom edited" })
+      .locator("tr", { hasText: "NTV-like Atom edited" })
       .getByRole("link", { name: "Delete", exact: true })
       .click();
     await expect(

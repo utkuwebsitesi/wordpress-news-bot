@@ -11,7 +11,7 @@ final class SqliteWpdb
     public function __construct(){
         $this->pdo=new PDO('sqlite::memory:');$this->pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
         foreach([
-            'CREATE TABLE wp_wpnb_sources (id INTEGER PRIMARY KEY,name TEXT,feed_url TEXT,canonical_hash TEXT DEFAULT "",active INTEGER DEFAULT 1,category_id INTEGER DEFAULT 0,allowed_domains TEXT,last_checked_at TEXT,last_result TEXT,last_error TEXT,created_at TEXT,updated_at TEXT)',
+            'CREATE TABLE wp_wpnb_sources (id INTEGER PRIMARY KEY,name TEXT,feed_url TEXT,canonical_hash TEXT DEFAULT "",active INTEGER DEFAULT 1,category_id INTEGER DEFAULT 0,allowed_domains TEXT,import_images INTEGER DEFAULT 1,draft_without_image INTEGER DEFAULT 1,use_og_image INTEGER DEFAULT 0,last_checked_at TEXT,last_result TEXT,last_error TEXT,created_at TEXT,updated_at TEXT)',
             'CREATE TABLE wp_wpnb_feed_items (id INTEGER PRIMARY KEY,source_id INTEGER,guid TEXT,normalized_url TEXT,content_hash TEXT,source_url TEXT,title TEXT,status TEXT,created_at TEXT,updated_at TEXT)',
             'CREATE TABLE wp_wpnb_jobs (id INTEGER PRIMARY KEY,feed_item_id INTEGER,status TEXT)',
             'CREATE TABLE wp_wpnb_ai_generations (id INTEGER PRIMARY KEY,feed_item_id INTEGER)',
