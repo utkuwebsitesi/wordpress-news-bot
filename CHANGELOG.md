@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0-rc.1 - Daily automatic publishing
+
+- Added site-timezone daily/per-source quotas, active days and hours, minimum spacing, maximum news age, batch and retry controls.
+- The first-enable timestamp excludes the existing pool unless an administrator supplies a date, count limit and explicit confirmation.
+- Added source priority and round-robin selection, global/source/item locks, source failure isolation and temporary OpenAI quota pauses.
+- Added a WP-CLI-first and HTTPS-fallback server cron command, heartbeat warning, operational cards, safe manual run controls and run history.
+- Automatic posts still pass the existing two-stage publication, category, featured-image, source-leak and duplicate gates before becoming public.
+
 ## 0.4.0-rc.4 - Processed pool and safe publication lifecycle
 
 - AI ile ilişkilendirilmiş WordPress yazıları idempotent migration ile `processed` veya `published` durumuna alınır; feed kayıtları, hash ve post ilişkileri korunur.

@@ -353,6 +353,78 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     );
   });
 
+  test("runs daily automation safely with heartbeat, quotas, backlog isolation, failures and concurrency", async () => {
+    await page.goto("/wp-admin/admin.php?page=wpnb-automation");
+    await expect(page.getByRole("heading", { name: "Automation" }).first()).toBeVisible();
+    await expect(page.locator("#wpnb-cron-command")).toContainText("wpnb_automation_tick");
+    const before = await state(page);
+    const setupResponse = await page.request.post("/?rest_route=/wpnb-test/v1/automation-setup", { headers: { "x-wpnb-test": "1" } });
+    expect(setupResponse.ok()).toBeTruthy();
+    const setup = await setupResponse.json();
+    expect(setup.attachment).toBeGreaterThan(0);
+    for (let slot = 0; slot < 4; slot += 1) {
+      const response = await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { make_due: true, force: false } });
+      expect(response.ok()).toBeTruthy();
+      expect((await response.json()).published).toBe(1);
+    }
+    let db = await state(page);
+    expect(db.published).toBe(before.published + 4);
+    const automatic = db.published_records.slice(0, 4);
+    for (const post of automatic) {
+      expect(post.thumbnail_id).toBeGreaterThan(0);
+      expect(post.content).not.toMatch(/(?:Source:|Kaynak:|https?:\/\/)/i);
+      expect(post.feed_status).toBe("published");
+    }
+    const oldResponse = await page.request.get(`/?rest_route=/wpnb-test/v1/automation-item&id=${setup.old_id}`, { headers: { "x-wpnb-test": "1" } });
+    const oldItem = await oldResponse.json();
+    expect(oldItem.wordpress_post_id).toBe("0");
+    expect(oldItem.status).toBe("new");
+    const fifth = await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { make_due: true, force: true } });
+    expect((await fifth.json()).message).toBe("daily_quota_complete");
+    expect((await state(page)).published).toBe(before.published + 4);
+
+    const nextDay = await page.request.post("/?rest_route=/wpnb-test/v1/automation-day-offset", { headers: { "x-wpnb-test": "1" }, data: { days: 1 } });
+    expect((await nextDay.json()).days).toBe(1);
+    const resetRun = await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { make_due: true, force: false } });
+    expect((await resetRun.json()).published).toBe(1);
+    expect((await state(page)).published).toBe(before.published + 5);
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-day-offset", { headers: { "x-wpnb-test": "1" }, data: { days: 0 } });
+
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-enable", { headers: { "x-wpnb-test": "1" }, data: { enabled: true, limit: 10 } });
+    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", { headers: { "x-wpnb-test": "1" }, data: { enabled: true } });
+    const aiSeed = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-seed-one", { headers: { "x-wpnb-test": "1" } })).json();
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-prune", { headers: { "x-wpnb-test": "1" }, data: { keep: aiSeed.id } });
+    const aiFailure = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { force: true } })).json();
+    expect(aiFailure.failed).toBe(1);
+    expect((await state(page)).published).toBe(before.published + 5);
+    await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", { headers: { "x-wpnb-test": "1" }, data: { enabled: false } });
+
+    const imageSeed = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-seed-one", { headers: { "x-wpnb-test": "1" }, data: { missing_image: true } })).json();
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-prune", { headers: { "x-wpnb-test": "1" }, data: { keep: imageSeed.id } });
+    const imageFailure = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { force: true } })).json();
+    expect(imageFailure.failed).toBe(1);
+    expect((await state(page)).published).toBe(before.published + 5);
+
+    const concurrentSeed = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-seed-one", { headers: { "x-wpnb-test": "1" } })).json();
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-prune", { headers: { "x-wpnb-test": "1" }, data: { keep: concurrentSeed.id } });
+    const calls = await Promise.all([0, 1].map(() => page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { force: true } })));
+    expect(calls.every((response) => response.ok())).toBeTruthy();
+    db = await state(page);
+    expect(db.published).toBe(before.published + 6);
+    const concurrentItem = await (await page.request.get(`/?rest_route=/wpnb-test/v1/automation-item&id=${concurrentSeed.id}`, { headers: { "x-wpnb-test": "1" } })).json();
+    expect(Number(concurrentItem.wordpress_post_id)).toBeGreaterThan(0);
+
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-enable", { headers: { "x-wpnb-test": "1" }, data: { enabled: false, limit: 10 } });
+    const disabledSeed = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-seed-one", { headers: { "x-wpnb-test": "1" } })).json();
+    await page.request.post("/?rest_route=/wpnb-test/v1/automation-prune", { headers: { "x-wpnb-test": "1" }, data: { keep: disabledSeed.id } });
+    const disabledRun = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { force: true } })).json();
+    expect(disabledRun.status).toBe("disabled");
+    expect((await state(page)).published).toBe(before.published + 6);
+    await page.goto("/wp-admin/admin.php?page=wpnb-automation");
+    await expect(page.locator("body")).toContainText("Last heartbeat");
+    console.log(`RC1 automation evidence: old_unprocessed=${setup.old_id} published=6 daily_limit=4 next_day_reset=1 duplicate_posts=0 cron_disabled=${db.cron_disabled}`);
+  });
+
   test("renders all admin pages at desktop and mobile widths without console errors", async () => {
     const errors = [];
     page.on("console", (msg) => {
@@ -363,6 +435,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       "wpnb-setup",
       "wpnb-sources",
       "wpnb-pool",
+      "wpnb-automation",
       "wpnb-legacy-drafts",
       "wpnb-settings",
       "wpnb-health",

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WordPress News Bot
  * Description: Güvenli RSS/Atom haber havuzu ve editör kontrollü içerik hazırlama altyapısı.
- * Version: 0.4.0-rc.4
+ * Version: 0.5.0-rc.1
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Utkuweb
@@ -12,12 +12,14 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) { exit; }
 
-define('WPNB_VERSION', '0.4.0-rc.4');
-define('WPNB_SCHEMA_VERSION', '1.9.0');
+define('WPNB_VERSION', '0.5.0-rc.1');
+define('WPNB_SCHEMA_VERSION', '2.0.0');
 define('WPNB_FILE', __FILE__);
 define('WPNB_DIR', plugin_dir_path(__FILE__));
 
 require_once WPNB_DIR . 'includes/Support.php';
+require_once WPNB_DIR . 'includes/AutomationSettings.php';
+require_once WPNB_DIR . 'includes/OptionLock.php';
 require_once WPNB_DIR . 'includes/DatabaseErrorClassifier.php';
 require_once WPNB_DIR . 'includes/DatabaseSchema.php';
 require_once WPNB_DIR . 'includes/DatabaseHealth.php';
@@ -59,6 +61,7 @@ require_once WPNB_DIR . 'includes/SourceService.php';
 require_once WPNB_DIR . 'includes/SourceRecoveryRequired.php';
 require_once WPNB_DIR . 'includes/SourceMigration.php';
 require_once WPNB_DIR . 'includes/LegacyDraftPublisher.php';
+require_once WPNB_DIR . 'includes/AutomationService.php';
 require_once WPNB_DIR . 'admin/Admin.php';
 require_once WPNB_DIR . 'includes/Plugin.php';
 

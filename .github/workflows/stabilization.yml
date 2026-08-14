@@ -95,11 +95,11 @@ jobs:
       - run: find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: php bin/quality-gates.php
       - run: php bin/compile-mo.php languages/wordpress-news-bot-tr_TR.po /tmp/wordpress-news-bot-tr_TR.mo && cmp /tmp/wordpress-news-bot-tr_TR.mo languages/wordpress-news-bot-tr_TR.mo
-      - run: mkdir -p dist && php bin/build-release.php 0.4.0-rc.4 "$PWD" "$PWD/dist/wordpress-news-bot-0.4.0-rc.4.zip"
+      - run: mkdir -p dist && php bin/build-release.php 0.5.0-rc.1 "$PWD" "$PWD/dist/wordpress-news-bot-0.5.0-rc.1.zip"
       - name: Build historical upgrade packages
         run: |
           set -euo pipefail
-          for row in '0.3.0 ffa89515c233df681572c41204bedef6adaf9907' '0.3.1 c7e5d5b6614e6b7a9c0116ce6f3d1b7aa8e85002' '0.3.2 9513c3d416c5f0b832623e6a4867e9d51ca99fc0' '0.3.3 80b6fc4abfcbe88233a8cda2e4b9d71896ebc982' '0.3.4 6665ec13febc70ce427522a9fdf0916375a86eff' '0.3.5 5ab7a0647a57c5755415e641ad3584622b0a10a5' '0.4.0-rc.3 1a02e841d843b7a4c112094b054a12b87f377c34'; do
+          for row in '0.3.0 ffa89515c233df681572c41204bedef6adaf9907' '0.3.1 c7e5d5b6614e6b7a9c0116ce6f3d1b7aa8e85002' '0.3.2 9513c3d416c5f0b832623e6a4867e9d51ca99fc0' '0.3.3 80b6fc4abfcbe88233a8cda2e4b9d71896ebc982' '0.3.4 6665ec13febc70ce427522a9fdf0916375a86eff' '0.3.5 5ab7a0647a57c5755415e641ad3584622b0a10a5' '0.4.0-rc.1 8f09e2a72e2bd1b45cbe102a95535eaa2b55110c' '0.4.0-rc.2 2994fcce0d6472763d3532281e76611bc5b7bb39' '0.4.0-rc.3 1a02e841d843b7a4c112094b054a12b87f377c34' '0.4.0-rc.4 f853cc3f0f2233591a1f9ee893df83a083985386'; do
             read -r version ref <<< "$row"; work=$(mktemp -d); git archive --format=zip --output="$work/source.zip" "$ref"; unzip -q "$work/source.zip" -d "$work/source"; php bin/build-release.php "$version" "$work/source" "$PWD/dist/wordpress-news-bot-$version.zip"; rm -rf "$work";
           done
       - run: sha256sum dist/*.zip | tee dist/SHA256SUMS
@@ -156,7 +156,7 @@ jobs:
       {
         fail-fast: false,
         matrix:
-          { version: ["0.3.0", "0.3.1", "0.3.2", "0.3.3", "0.3.4", "0.3.5", "0.4.0-rc.3"] },
+          { version: ["0.3.0", "0.3.1", "0.3.2", "0.3.3", "0.3.4", "0.3.5", "0.4.0-rc.1", "0.4.0-rc.2", "0.4.0-rc.3", "0.4.0-rc.4"] },
       }
     steps:
       - uses: actions/checkout@v4

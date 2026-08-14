@@ -4,10 +4,10 @@ namespace WordPressNewsBot;
 
 final class DraftService
 {
-    public function create(int$itemId):int
+    public function create(int$itemId,array$context=[]):int
     {
         if(!Security::canReview())throw new \RuntimeException(__('You do not have permission to create posts.','wordpress-news-bot'));
-        $settings=(array)get_option('wpnb_settings',[]);$mode=in_array((string)($settings['publication_mode']??'publish'),['publish','draft'],true)?(string)($settings['publication_mode']??'publish'):'publish';
+        $settings=(array)get_option('wpnb_settings',[]);$requested=(string)($context['publication_mode']??$settings['publication_mode']??'publish');$mode=in_array($requested,['publish','draft'],true)?$requested:'publish';
         if($mode==='publish'&&!current_user_can('publish_posts'))throw new \RuntimeException(__('You do not have permission to publish posts.','wordpress-news-bot'));
         $lock='wpnb_draft_lock_'.$itemId;if(!$this->acquireLock($lock))throw new \RuntimeException(__('This news item is already being processed.','wordpress-news-bot'));
         global$wpdb;$reserved=false;$generationId=0;$jobId=0;$postId=0;$completed=false;$failureReason='unexpected';
@@ -17,7 +17,7 @@ final class DraftService
             if($existing){$existingId=(int)$existing[0];$wpdb->update(Support::table('feed_items'),['wordpress_post_id'=>$existingId,'status'=>get_post_status($existingId)==='publish'?'published':'processed','updated_at'=>Support::now()],['id'=>$itemId],['%d','%s','%s'],['%d']);return$existingId;}
             if((int)$item['category_id']<1)throw new \RuntimeException(__('A WordPress category is required.','wordpress-news-bot'));
             if(!empty($item['import_images'])&&(int)($item['image_attachment_id']??0)<1){(new ImageImportService())->import($itemId);$item=$this->item($itemId)?:$item;}
-            $requiresImage=!empty($item['import_images'])&&($mode==='publish'||empty($item['draft_without_image']));if($requiresImage&&(int)($item['image_attachment_id']??0)<1)throw new \RuntimeException(__('A valid featured image is required.','wordpress-news-bot'));
+            $requiresImage=!empty($context['require_image'])||(!empty($item['import_images'])&&($mode==='publish'||empty($item['draft_without_image'])));if($requiresImage&&(int)($item['image_attachment_id']??0)<1)throw new \RuntimeException(__('A valid featured image is required.','wordpress-news-bot'));
             $job=['feed_item_id'=>$itemId,'type'=>'create_post','status'=>'running','attempts'=>1,'locked_at'=>Support::now(),'error_message'=>null,'created_at'=>Support::now(),'updated_at'=>Support::now()];if($wpdb->insert(Support::table('jobs'),$job,DatabaseSchema::formatsFor('jobs',$job))===false)throw new \RuntimeException(__('The post processing history could not be started.','wordpress-news-bot'));$jobId=(int)$wpdb->insert_id;
             $quota=max(0,(int)($settings['daily_ai_quota']??25));if(!$this->reserveQuota($quota))throw new \RuntimeException(__('The daily AI quota has been reached.','wordpress-news-bot'));$reserved=true;
             $provider=(($settings['ai_provider']??'openai')==='openai')?new OpenAiProvider(Credentials::openAiKey(),(string)($settings['ai_model']??'gpt-4o-mini')):new MockAiProvider();$output=$provider->generate($item);
@@ -33,6 +33,6 @@ final class DraftService
     private function item(int$id):?array{global$wpdb;return$wpdb->get_row($wpdb->prepare('SELECT f.*,s.name AS source_name,s.category_id,s.import_images,s.draft_without_image FROM '.Support::table('feed_items').' f JOIN '.Support::table('sources').' s ON s.id=f.source_id WHERE f.id=%d LIMIT 1',$id),ARRAY_A)?:null;}
     private function acquireLock(string$key):bool{if(add_option($key,time(),'','no'))return true;$created=(int)get_option($key,0);if($created>0&&$created<time()-5*MINUTE_IN_SECONDS){delete_option($key);return add_option($key,time(),'','no');}return false;}
     private function releaseLock(string$key):void{delete_option($key);}
-    private function reserveQuota(int$quota):bool{if($quota<1)return false;global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$date=gmdate('Y-m-d');$updated=$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota));if($updated===1)return true;$inserted=$wpdb->query($wpdb->prepare("INSERT IGNORE INTO $table (usage_date,ai_requests) VALUES (%s,1)",$date));if($inserted===1)return true;return$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota))===1;}
-    private function releaseQuota():void{global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=GREATEST(0,ai_requests-1) WHERE usage_date=%s",gmdate('Y-m-d')));}
+    private function reserveQuota(int$quota):bool{if($quota<1)return false;global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$date=Support::siteDate();$updated=$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota));if($updated===1)return true;$inserted=$wpdb->query($wpdb->prepare("INSERT IGNORE INTO $table (usage_date,ai_requests) VALUES (%s,1)",$date));if($inserted===1)return true;return$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota))===1;}
+    private function releaseQuota():void{global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=GREATEST(0,ai_requests-1) WHERE usage_date=%s",Support::siteDate()));}
 }
