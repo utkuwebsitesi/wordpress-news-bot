@@ -9,12 +9,13 @@ final class Database
         global $wpdb;
         try {
             $result=(new DatabaseRepair($wpdb))->run(true);
-            if($result['status']==='healthy')update_option('wpnb_plugin_version',WPNB_VERSION,false);
+            if($result['status']==='healthy'){(new ProcessedItemMigration())->run();update_option('wpnb_plugin_version',WPNB_VERSION,false);}
             else update_option('wpnb_source_recovery_required',['reason'=>'database_repair_required','detected_at'=>Support::now(),'schema_fingerprint'=>$result['after']],false);
         } catch (\Throwable $e) {
             update_option('wpnb_source_recovery_required', ['reason'=>'database_repair_failed','detected_at'=>Support::now(),'error_class'=>get_class($e)], false);
         }
-        add_option('wpnb_settings', ['ai_provider'=>'openai','ai_model'=>'gpt-4o-mini','language'=>'tr','tone'=>'professional','min_words'=>300,'max_words'=>700,'show_attribution'=>0,'daily_ai_quota'=>25,'max_run_items'=>5,'image_max_bytes'=>5242880,'image_min_width'=>300,'image_min_height'=>200,'cron_enabled'=>0,'retention_days'=>90], '', false);
+        $defaults=['ai_provider'=>'openai','ai_model'=>'gpt-4o-mini','language'=>'tr','tone'=>'professional','min_words'=>300,'max_words'=>700,'show_attribution'=>0,'publication_mode'=>'publish','daily_ai_quota'=>25,'max_run_items'=>5,'image_max_bytes'=>5242880,'image_min_width'=>300,'image_min_height'=>200,'cron_enabled'=>0,'retention_days'=>90];
+        if(!add_option('wpnb_settings',$defaults,'',false)){$settings=(array)get_option('wpnb_settings',[]);if(!isset($settings['publication_mode'])){$settings['publication_mode']='publish';update_option('wpnb_settings',$settings,false);}}
         add_option('wpnb_setup_state', SetupState::initial(), '', false);
         add_option('wpnb_connection_status', ['connected'=>0], '', false);
     }

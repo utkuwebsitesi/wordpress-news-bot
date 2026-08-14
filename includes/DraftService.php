@@ -4,55 +4,35 @@ namespace WordPressNewsBot;
 
 final class DraftService
 {
-    public function create(int $itemId): int
+    public function create(int$itemId):int
     {
-        if(!Security::canReview())throw new \RuntimeException(__('You do not have permission to create drafts.','wordpress-news-bot'));
-        $lock='wpnb_draft_lock_'.$itemId;
-        if(!$this->acquireLock($lock))throw new \RuntimeException(__('This news item is already being processed.','wordpress-news-bot'));
-        global$wpdb;$reserved=false;$generationId=0;$jobId=0;
+        if(!Security::canReview())throw new \RuntimeException(__('You do not have permission to create posts.','wordpress-news-bot'));
+        $settings=(array)get_option('wpnb_settings',[]);$mode=in_array((string)($settings['publication_mode']??'publish'),['publish','draft'],true)?(string)($settings['publication_mode']??'publish'):'publish';
+        if($mode==='publish'&&!current_user_can('publish_posts'))throw new \RuntimeException(__('You do not have permission to publish posts.','wordpress-news-bot'));
+        $lock='wpnb_draft_lock_'.$itemId;if(!$this->acquireLock($lock))throw new \RuntimeException(__('This news item is already being processed.','wordpress-news-bot'));
+        global$wpdb;$reserved=false;$generationId=0;$jobId=0;$postId=0;$completed=false;$failureReason='unexpected';
         try{
-            $item=$wpdb->get_row($wpdb->prepare('SELECT f.*, s.name AS source_name, s.category_id, s.post_status, s.import_images, s.draft_without_image FROM '.Support::table('feed_items').' f JOIN '.Support::table('sources').' s ON s.id=f.source_id WHERE f.id=%d LIMIT 1',$itemId),ARRAY_A);
-            if(!$item)throw new \RuntimeException(__('The news item was not found.','wordpress-news-bot'));
-            $existing=get_posts(['post_type'=>'post','post_status'=>['draft','pending','publish','future'],'numberposts'=>1,'fields'=>'ids','meta_query'=>['relation'=>'OR',['key'=>'_wpnb_feed_item_id','value'=>(string)$itemId],['key'=>'_wpnb_source_url','value'=>esc_url_raw((string)$item['source_url'])],['key'=>'_wpnb_content_hash','value'=>sanitize_text_field((string)$item['content_hash'])]]]);
-            if($existing){$wpdb->update(Support::table('feed_items'),['status'=>'duplicate','updated_at'=>Support::now()],['id'=>$itemId],['%s','%s'],['%d']);return(int)$existing[0];}
-
-            if(!empty($item['import_images'])&&(int)($item['image_attachment_id']??0)<1){(new ImageImportService())->import($itemId);$item=(array)$wpdb->get_row($wpdb->prepare('SELECT f.*, s.name AS source_name, s.category_id, s.post_status, s.import_images, s.draft_without_image FROM '.Support::table('feed_items').' f JOIN '.Support::table('sources').' s ON s.id=f.source_id WHERE f.id=%d LIMIT 1',$itemId),ARRAY_A);}
-            if(!empty($item['import_images'])&&empty($item['draft_without_image'])&&(int)($item['image_attachment_id']??0)<1)throw new \RuntimeException(__('A valid image is required for this source before creating a draft.','wordpress-news-bot'));
-
-            $job=['feed_item_id'=>$itemId,'type'=>'create_draft','status'=>'running','attempts'=>1,'locked_at'=>Support::now(),'error_message'=>null,'created_at'=>Support::now(),'updated_at'=>Support::now()];
-            if($wpdb->insert(Support::table('jobs'),$job,DatabaseSchema::formatsFor('jobs',$job))!==false)$jobId=(int)$wpdb->insert_id;
-            $settings=(array)get_option('wpnb_settings',[]);$quota=max(0,(int)($settings['daily_ai_quota']??25));
-            if(!$this->reserveQuota($quota))throw new \RuntimeException(__('The daily AI quota has been reached.','wordpress-news-bot'));
-            $reserved=true;
-            $provider=(($settings['ai_provider']??'openai')==='openai')?new OpenAiProvider(Credentials::openAiKey(),(string)($settings['ai_model']??'gpt-4o-mini')):new MockAiProvider();
-            $output=$provider->generate($item);
-            $generation=['feed_item_id'=>$itemId,'provider'=>$provider instanceof OpenAiProvider?'openai':'mock','model'=>$provider->model(),'output_json'=>Support::json($output),'input_tokens'=>0,'output_tokens'=>0,'estimated_cost'=>0,'created_at'=>Support::now()];
-            if($wpdb->insert(Support::table('ai_generations'),$generation,DatabaseSchema::formatsFor('ai_generations',$generation))===false)throw new \RuntimeException(__('The AI generation record could not be saved.','wordpress-news-bot'));
-            $generationId=(int)$wpdb->insert_id;
-            $content=ContentSanitizer::clean((string)$output['content_html']);
-            $postId=wp_insert_post(DraftPolicy::postArgs($output,get_current_user_id(),(int)$item['category_id'],$content),true);
-            if(is_wp_error($postId))throw new \RuntimeException(__('The WordPress draft could not be created.','wordpress-news-bot'));
+            $item=$this->item($itemId);if(!$item)throw new \RuntimeException(__('The news item was not found.','wordpress-news-bot'));
+            $existing=get_posts(['post_type'=>'post','post_status'=>['draft','pending','publish','future','private'],'numberposts'=>1,'fields'=>'ids','meta_query'=>['relation'=>'OR',['key'=>'_wpnb_feed_item_id','value'=>(string)$itemId],['key'=>'_wpnb_source_url','value'=>esc_url_raw((string)$item['source_url'])],['key'=>'_wpnb_content_hash','value'=>sanitize_text_field((string)$item['content_hash'])]]]);
+            if($existing){$existingId=(int)$existing[0];$wpdb->update(Support::table('feed_items'),['wordpress_post_id'=>$existingId,'status'=>get_post_status($existingId)==='publish'?'published':'processed','updated_at'=>Support::now()],['id'=>$itemId],['%d','%s','%s'],['%d']);return$existingId;}
+            if((int)$item['category_id']<1)throw new \RuntimeException(__('A WordPress category is required.','wordpress-news-bot'));
+            if(!empty($item['import_images'])&&(int)($item['image_attachment_id']??0)<1){(new ImageImportService())->import($itemId);$item=$this->item($itemId)?:$item;}
+            $requiresImage=!empty($item['import_images'])&&($mode==='publish'||empty($item['draft_without_image']));if($requiresImage&&(int)($item['image_attachment_id']??0)<1)throw new \RuntimeException(__('A valid featured image is required.','wordpress-news-bot'));
+            $job=['feed_item_id'=>$itemId,'type'=>'create_post','status'=>'running','attempts'=>1,'locked_at'=>Support::now(),'error_message'=>null,'created_at'=>Support::now(),'updated_at'=>Support::now()];if($wpdb->insert(Support::table('jobs'),$job,DatabaseSchema::formatsFor('jobs',$job))===false)throw new \RuntimeException(__('The post processing history could not be started.','wordpress-news-bot'));$jobId=(int)$wpdb->insert_id;
+            $quota=max(0,(int)($settings['daily_ai_quota']??25));if(!$this->reserveQuota($quota))throw new \RuntimeException(__('The daily AI quota has been reached.','wordpress-news-bot'));$reserved=true;
+            $provider=(($settings['ai_provider']??'openai')==='openai')?new OpenAiProvider(Credentials::openAiKey(),(string)($settings['ai_model']??'gpt-4o-mini')):new MockAiProvider();$output=$provider->generate($item);
+            $generation=['feed_item_id'=>$itemId,'provider'=>$provider instanceof OpenAiProvider?'openai':'mock','model'=>$provider->model(),'output_json'=>Support::json($output),'input_tokens'=>0,'output_tokens'=>0,'estimated_cost'=>0,'created_at'=>Support::now()];if($wpdb->insert(Support::table('ai_generations'),$generation,DatabaseSchema::formatsFor('ai_generations',$generation))===false)throw new \RuntimeException(__('The AI generation record could not be saved.','wordpress-news-bot'));$generationId=(int)$wpdb->insert_id;
+            $content=ContentSanitizer::clean((string)$output['content_html']);$inserted=wp_insert_post(DraftPolicy::postArgs($output,get_current_user_id(),(int)$item['category_id'],$content),true);if(is_wp_error($inserted)||(int)$inserted<1)throw new \RuntimeException(__('The WordPress post could not be prepared.','wordpress-news-bot'));$postId=(int)$inserted;
             update_post_meta($postId,'_wpnb_source_id',(int)$item['source_id']);update_post_meta($postId,'_wpnb_source_url',esc_url_raw((string)$item['source_url']));update_post_meta($postId,'_wpnb_feed_item_id',$itemId);update_post_meta($postId,'_wpnb_content_hash',sanitize_text_field((string)$item['content_hash']));update_post_meta($postId,'_wpnb_ai_provider',$generation['provider']);update_post_meta($postId,'_wpnb_ai_model',$provider->model());update_post_meta($postId,'_wpnb_generated_at',Support::now());wp_set_post_tags($postId,$output['suggested_tags']);
-            $attachmentId=(int)($item['image_attachment_id']??0);if($attachmentId>0&&get_post_type($attachmentId)==='attachment'&&in_array((string)get_post_mime_type($attachmentId),['image/jpeg','image/png','image/webp'],true)){update_post_meta($attachmentId,'_wp_attachment_image_alt',sanitize_text_field((string)$output['title']));wp_update_post(['ID'=>$attachmentId,'post_parent'=>(int)$postId,'post_excerpt'=>'','post_content'=>'']);update_post_meta($postId,'_wpnb_image_attachment_id',$attachmentId);if(!empty($item['image_url']))update_post_meta($postId,'_wpnb_source_image_url',esc_url_raw((string)$item['image_url']));if(!set_post_thumbnail($postId,$attachmentId))$wpdb->update(Support::table('feed_items'),['image_status'=>'error','image_error_code'=>'thumbnail_failed','updated_at'=>Support::now()],['id'=>$itemId],['%s','%s','%s'],['%d']);}
-            $wpdb->update(Support::table('feed_items'),['status'=>'draft_created','updated_at'=>Support::now()],['id'=>$itemId],['%s','%s'],['%d']);
-            if($jobId>0)$wpdb->update(Support::table('jobs'),['status'=>'completed','locked_at'=>null,'updated_at'=>Support::now()],['id'=>$jobId],['%s','%s','%s'],['%d']);
-            return(int)$postId;
-        }catch(\Throwable$e){
-            if($reserved)$this->releaseQuota();
-            if($generationId>0)$wpdb->delete(Support::table('ai_generations'),['id'=>$generationId],['%d']);
-            if($jobId>0)$wpdb->update(Support::table('jobs'),['status'=>'failed','locked_at'=>null,'error_message'=>__('Draft creation failed.','wordpress-news-bot'),'updated_at'=>Support::now()],['id'=>$jobId],['%s','%s','%s','%s'],['%d']);
-            $wpdb->update(Support::table('feed_items'),['status'=>'error','updated_at'=>Support::now()],['id'=>$itemId],['%s','%s'],['%d']);throw$e;
-        }finally{$this->releaseLock($lock);}
+            $attachmentId=(int)($item['image_attachment_id']??0);if($attachmentId>0&&get_post_type($attachmentId)==='attachment'&&in_array((string)get_post_mime_type($attachmentId),['image/jpeg','image/png','image/webp'],true)){update_post_meta($attachmentId,'_wp_attachment_image_alt',sanitize_text_field((string)$output['title']));wp_update_post(['ID'=>$attachmentId,'post_parent'=>$postId,'post_excerpt'=>'','post_content'=>'']);update_post_meta($postId,'_wpnb_image_attachment_id',$attachmentId);if(!empty($item['image_url']))update_post_meta($postId,'_wpnb_source_image_url',esc_url_raw((string)$item['image_url']));if(!set_post_thumbnail($postId,$attachmentId))throw new \RuntimeException(__('The featured image could not be assigned.','wordpress-news-bot'));}
+            $guard=(new PublicationGuard())->validate($postId,$item,$requiresImage);if(!$guard['valid']){$failureReason='publication_'.$guard['reason'];throw new \RuntimeException(__('The prepared post did not pass publication validation.','wordpress-news-bot'));}
+            $finalStatus='processed';if($mode==='publish'){$published=wp_update_post(['ID'=>$postId,'post_status'=>'publish'],true);if(is_wp_error($published)||get_post_status($postId)!=='publish')throw new \RuntimeException(__('The post could not be published safely.','wordpress-news-bot'));$finalStatus='published';}
+            if($wpdb->update(Support::table('feed_items'),['wordpress_post_id'=>$postId,'status'=>$finalStatus,'updated_at'=>Support::now()],['id'=>$itemId],['%d','%s','%s'],['%d'])===false)throw new \RuntimeException(__('The news item could not be linked to the WordPress post.','wordpress-news-bot'));if($wpdb->update(Support::table('jobs'),['status'=>'completed','locked_at'=>null,'updated_at'=>Support::now()],['id'=>$jobId],['%s','%s','%s'],['%d'])===false)throw new \RuntimeException(__('The post processing history could not be completed.','wordpress-news-bot'));$completed=true;return$postId;
+        }catch(\Throwable$e){if($postId>0&&!$completed)wp_delete_post($postId,true);if($reserved)$this->releaseQuota();if($generationId>0)$wpdb->delete(Support::table('ai_generations'),['id'=>$generationId],['%d']);if($jobId>0)$wpdb->update(Support::table('jobs'),['status'=>'failed','locked_at'=>null,'error_message'=>__('Post creation failed.','wordpress-news-bot'),'updated_at'=>Support::now()],['id'=>$jobId],['%s','%s','%s','%s'],['%d']);$wpdb->update(Support::table('feed_items'),['status'=>'error','updated_at'=>Support::now()],['id'=>$itemId],['%s','%s'],['%d']);$log=['level'=>'error','event'=>'post_creation_failed','message'=>'A post creation operation failed.','context_json'=>Support::json(Security::cleanLogContext(['feed_item_id'=>$itemId,'failure_code'=>$failureReason,'exception_class'=>get_class($e)])),'created_at'=>Support::now()];$wpdb->insert(Support::table('logs'),$log,DatabaseSchema::formatsFor('logs',$log));throw$e;}finally{$this->releaseLock($lock);}
     }
-
-    private function acquireLock(string$key):bool
-    {
-        if(add_option($key,time(),'','no'))return true;$created=(int)get_option($key,0);if($created>0&&$created<time()-5*MINUTE_IN_SECONDS){delete_option($key);return add_option($key,time(),'','no');}return false;
-    }
+    private function item(int$id):?array{global$wpdb;return$wpdb->get_row($wpdb->prepare('SELECT f.*,s.name AS source_name,s.category_id,s.import_images,s.draft_without_image FROM '.Support::table('feed_items').' f JOIN '.Support::table('sources').' s ON s.id=f.source_id WHERE f.id=%d LIMIT 1',$id),ARRAY_A)?:null;}
+    private function acquireLock(string$key):bool{if(add_option($key,time(),'','no'))return true;$created=(int)get_option($key,0);if($created>0&&$created<time()-5*MINUTE_IN_SECONDS){delete_option($key);return add_option($key,time(),'','no');}return false;}
     private function releaseLock(string$key):void{delete_option($key);}
-    private function reserveQuota(int$quota):bool
-    {
-        if($quota<1)return false;global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$date=gmdate('Y-m-d');$updated=$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota));if($updated===1)return true;$inserted=$wpdb->query($wpdb->prepare("INSERT IGNORE INTO $table (usage_date,ai_requests) VALUES (%s,1)",$date));if($inserted===1)return true;return$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota))===1;
-    }
+    private function reserveQuota(int$quota):bool{if($quota<1)return false;global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$date=gmdate('Y-m-d');$updated=$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota));if($updated===1)return true;$inserted=$wpdb->query($wpdb->prepare("INSERT IGNORE INTO $table (usage_date,ai_requests) VALUES (%s,1)",$date));if($inserted===1)return true;return$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=ai_requests+1 WHERE usage_date=%s AND ai_requests<%d",$date,$quota))===1;}
     private function releaseQuota():void{global$wpdb;$table=DatabaseSchema::identifier(Support::table('daily_usage'));$wpdb->query($wpdb->prepare("UPDATE $table SET ai_requests=GREATEST(0,ai_requests-1) WHERE usage_date=%s",gmdate('Y-m-d')));}
 }
