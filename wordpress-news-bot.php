@@ -2,17 +2,18 @@
 /**
  * Plugin Name: WordPress News Bot
  * Description: Güvenli RSS/Atom haber havuzu ve editör kontrollü içerik hazırlama altyapısı.
- * Version: 0.5.0-rc.1
+ * Version: 0.5.0-rc.2
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Utkuweb
  * Text Domain: wordpress-news-bot
+ * Domain Path: /languages
  */
 declare(strict_types=1);
 
 if (!defined('ABSPATH')) { exit; }
 
-define('WPNB_VERSION', '0.5.0-rc.1');
+define('WPNB_VERSION', '0.5.0-rc.2');
 define('WPNB_SCHEMA_VERSION', '2.0.0');
 define('WPNB_FILE', __FILE__);
 define('WPNB_DIR', plugin_dir_path(__FILE__));

@@ -7,7 +7,16 @@ final class Plugin
     public static function activate(): void { Database::activate(); }
     public static function deactivate(): void { Database::deactivate(); }
     public function boot(): void { if ((string)get_option('wpnb_schema_version','')!==WPNB_SCHEMA_VERSION||(string)get_option('wpnb_plugin_version','')!==WPNB_VERSION) Database::activate(); (new Admin())->register(); add_filter('cron_schedules',[$this,'cronSchedules']);add_action('init',[$this,'initialize']);add_action('wpnb_poll_sources', [$this, 'poll']);add_action('wpnb_automation_tick',[$this,'automationTick']); add_action('wpnb_sources_polled', [$this, 'importActiveSources']); add_action('update_option_wpnb_settings', [$this, 'syncCron'], 10, 3); }
-    public function initialize():void{load_plugin_textdomain('wordpress-news-bot',false,dirname(plugin_basename(WPNB_FILE)).'/languages');$this->ensureAutomationSchedule();}
+    public function initialize():void
+    {
+        load_plugin_textdomain('wordpress-news-bot',false,dirname(plugin_basename(WPNB_FILE)).'/languages');
+        $settings=(array)get_option('wpnb_settings',[]);
+        if(($settings['language']??'tr')==='tr'){
+            $turkish=WPNB_DIR.'languages/wordpress-news-bot-tr_TR.mo';
+            if(is_readable($turkish))load_textdomain('wordpress-news-bot',$turkish,'tr_TR');
+        }
+        $this->ensureAutomationSchedule();
+    }
     public function cronSchedules(array$schedules):array{$schedules['wpnb_five_minutes']=['interval'=>5*MINUTE_IN_SECONDS,'display'=>__('Every five minutes','wordpress-news-bot')];return$schedules;}
     public function syncCron(mixed $old, mixed $new): void { if ((int)($new['cron_enabled'] ?? 0) && !wp_next_scheduled('wpnb_poll_sources')) wp_schedule_event(time() + 300, 'hourly', 'wpnb_poll_sources'); if (!(int)($new['cron_enabled'] ?? 0)) wp_clear_scheduled_hook('wpnb_poll_sources');$this->ensureAutomationSchedule(); }
     public function ensureAutomationSchedule():void{if(!wp_next_scheduled('wpnb_automation_tick'))wp_schedule_event(time()+60,'wpnb_five_minutes','wpnb_automation_tick');}
