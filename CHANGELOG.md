@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0-rc.2 - Turkish administration fallback
+
+- Applies the bundled Turkish catalogue to the plugin administration screens when the plugin language is Turkish, even if the WordPress site locale is English.
+- Declares the plugin language directory explicitly in the WordPress header and adds a real WordPress locale regression check.
+
 ## 0.5.0-rc.1 - Daily automatic publishing
 
 - Added site-timezone daily/per-source quotas, active days and hours, minimum spacing, maximum news age, batch and retry controls.

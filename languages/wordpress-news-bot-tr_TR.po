@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WordPress News Bot 0.5.0-rc.1\n"
+"Project-Id-Version: WordPress News Bot 0.5.0-rc.2\n"
 "Language: tr_TR\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"

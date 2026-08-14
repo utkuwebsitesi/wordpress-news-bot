@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $po=$argv[1]??'';$mo=$argv[2]??'';
 if(!is_file($po)||$mo===''){fwrite(STDERR,"Usage: php compile-mo.php input.po output.mo\n");exit(2);}
-$source=file_get_contents($po);$messages=[''=>"Project-Id-Version: WordPress News Bot 0.5.0-rc.1\nLanguage: tr_TR\nContent-Type: text/plain; charset=UTF-8\nPlural-Forms: nplurals=2; plural=(n > 1);\n"];
+$source=file_get_contents($po);$messages=[''=>"Project-Id-Version: WordPress News Bot 0.5.0-rc.2\nLanguage: tr_TR\nContent-Type: text/plain; charset=UTF-8\nPlural-Forms: nplurals=2; plural=(n > 1);\n"];
 if(preg_match_all('/^msgid "((?:[^"\\\\]|\\\\.)*)"\Rmsgstr "((?:[^"\\\\]|\\\\.)*)"/m',$source,$matches,PREG_SET_ORDER))foreach($matches as$m){$id=stripcslashes($m[1]);if($id!=='')$messages[$id]=stripcslashes($m[2]);}
 ksort($messages,SORT_STRING);$ids=array_keys($messages);$translations=array_values($messages);$count=count($ids);$offsetOriginals=28;$offsetTranslations=$offsetOriginals+$count*8;$stringOffset=$offsetTranslations+$count*8;$originalTable='';$translationTable='';$originalStrings='';$translationStrings='';$cursor=$stringOffset;
 foreach($ids as$id){$originalTable.=pack('V2',strlen($id),$cursor);$originalStrings.=$id."\0";$cursor+=strlen($id)+1;}

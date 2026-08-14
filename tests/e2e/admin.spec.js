@@ -64,6 +64,18 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
       .click();
     await expect(page.locator("#the-list")).toContainText("WordPress News Bot");
     await expect(page.locator("#the-list")).toContainText("Utkuweb");
+    const i18n = await (
+      await page.request.get("/?rest_route=/wpnb-test/v1/i18n-state", {
+        headers: { "x-wpnb-test": "1" },
+      })
+    ).json();
+    expect(i18n.site_locale).toBe("en_US");
+    expect(i18n.plugin_language).toBe("tr");
+    expect(i18n.translated).toBe("Otomasyon Ayarları");
+    await page.request.post("/?rest_route=/wpnb-test/v1/ui-language", {
+      headers: { "x-wpnb-test": "1" },
+      data: { language: "en" },
+    });
     const imageSettings = await page.request.post(
       "/?rest_route=/wpnb-test/v1/image-settings",
       { headers: { "x-wpnb-test": "1" } },

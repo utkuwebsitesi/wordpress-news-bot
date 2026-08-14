@@ -1,12 +1,12 @@
 # WordPress News Bot
 
-Current candidate: `0.5.0-rc.1`
+Current candidate: `0.5.0-rc.2`
 
-0.5.0-rc.1 adds a professional Automation page with WordPress-timezone daily and per-source quotas, active days and publishing window, minimum spacing, maximum item age, retry limits, source priority and round-robin balancing. The first enable timestamp excludes the old pool by default. Servers with WP-Cron disabled receive a WP-CLI-first, HTTPS-fallback cron command and a five-minute heartbeat health check.
+0.5.0-rc.2 keeps the complete daily automation feature set from rc.1 and ensures that the bundled Turkish administration catalogue is used when the plugin language is Turkish, independently of an English WordPress site locale.
 
 P0 manuel akış: `Kaynak ekle → Haberleri çek → Haber havuzunda incele → AI ile taslak oluştur → WordPress taslağını düzenle`. Kaynak bazlı ve toplu haber çekme işlemleri WP-Cron kapalıyken de aynı güvenli import servisini kullanır; kullanıcının WP-CLI, phpMyAdmin veya sunucu cron'una ihtiyacı yoktur.
 
-Durum: **release candidate / günlük otomasyon kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında kota, heartbeat, cron, zaman dağıtımı, kilit, hata ve duplicate senaryoları doğrulanmadan `0.5.0-rc.1` hazır veya production-ready kabul edilmez.
+Durum: **release candidate / Türkçe arayüz ve günlük otomasyon kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında Türkçe yönetim arayüzü, kota, heartbeat, cron, zaman dağıtımı, kilit, hata ve duplicate senaryoları doğrulanmadan `0.5.0-rc.2` hazır veya production-ready kabul edilmez.
 
 Geliştirici: **Utkuweb**
 
