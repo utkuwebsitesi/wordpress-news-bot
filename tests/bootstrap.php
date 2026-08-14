@@ -2,7 +2,7 @@
 declare(strict_types=1);
 if (!defined('ARRAY_A')) { define('ARRAY_A', 'ARRAY_A'); }
 if (!defined('MINUTE_IN_SECONDS')) { define('MINUTE_IN_SECONDS', 60); }
-if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.5.0-rc.2'); }
+if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.5.0-rc.3'); }
 if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '2.0.0'); }
 if (!defined('HOUR_IN_SECONDS')) { define('HOUR_IN_SECONDS', 3600); }
 $GLOBALS['wpnb_test_options'] = [];
