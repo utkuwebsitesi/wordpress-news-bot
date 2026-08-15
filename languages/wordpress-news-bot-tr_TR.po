@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WordPress News Bot 0.5.0-rc.3\n"
+"Project-Id-Version: WordPress News Bot 0.5.0-rc.4\n"
 "Language: tr_TR\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1076,3 +1076,63 @@ msgstr "Bir eklenti kritik hatası otomasyonu kapattı."
 
 msgid "The server trigger could not be verified."
 msgstr "Sunucu tetikleyicisi doğrulanamadı."
+
+msgid "Waiting for first server trigger"
+msgstr "İlk sunucu tetiklemesi bekleniyor"
+
+msgid "External trigger interval"
+msgstr "Dış tetikleme aralığı"
+
+msgid "15 minutes"
+msgstr "15 dakika"
+
+msgid "Next server trigger"
+msgstr "Sonraki sunucu tetiklemesi"
+
+msgid "Next eligible news publication"
+msgstr "Sonraki uygun haber yayınlama zamanı"
+
+msgid "Automation is waiting for the first 15-minute server trigger."
+msgstr "Otomasyon ilk 15 dakikalık sunucu tetiklemesini bekliyor."
+
+msgid "No server heartbeat was received within the 20-minute tolerance. Automatic publishing is not running."
+msgstr "20 dakikalık tolerans içinde sunucu heartbeat sinyali alınmadı. Otomatik yayınlama çalışmıyor."
+
+msgid "Set the cPanel minute field to 0,15,30,45. Keep every other schedule field as *."
+msgstr "cPanel dakika alanını 0,15,30,45 olarak ayarlayın. Diğer tüm zamanlama alanlarını * olarak bırakın."
+
+msgid "Last zero-publication diagnostics"
+msgstr "Son sıfır yayın teşhisi"
+
+msgid "No automation diagnostic summary is available yet."
+msgstr "Henüz otomasyon teşhis özeti bulunmuyor."
+
+msgid "News age"
+msgstr "Haber yaşı"
+
+msgid "Image missing or invalid"
+msgstr "Görsel eksik veya geçersiz"
+
+msgid "AI quality validation"
+msgstr "AI kalite kontrolü"
+
+msgid "API or quota"
+msgstr "API veya kota"
+
+msgid "Source limit"
+msgstr "Kaynak limiti"
+
+msgid "Daily limit"
+msgstr "Günlük limit"
+
+msgid "45-minute waiting interval"
+msgstr "45 dakikalık bekleme süresi"
+
+msgid "Outside publishing hours or inactive day"
+msgstr "Yayın saatleri dışında veya etkin olmayan gün"
+
+msgid "Concurrent process lock"
+msgstr "Eşzamanlı işlem kilidi"
+
+msgid "Technical error"
+msgstr "Teknik hata"

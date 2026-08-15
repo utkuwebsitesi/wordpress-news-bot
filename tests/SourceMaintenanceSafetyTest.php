@@ -69,7 +69,8 @@ final class SourceMaintenanceSafetyTest extends TestCase
         $plugin=file_get_contents(dirname(__DIR__).'/includes/Plugin.php');
         $this->assertStringContainsString('new ManualImportService()',$admin);
         $this->assertStringContainsString('importActiveSources(bool $force=false)',$plugin);
-        $this->assertStringContainsString("if(!\$force&&\$last!==''",$plugin);
+        $this->assertStringContainsString('Support::utcTimestamp',$plugin);
+        $this->assertStringContainsString('if(!$force&&$last!==null',$plugin);
         $this->assertStringContainsString("do_action('wpnb_sources_polled')",$plugin);
     }
 

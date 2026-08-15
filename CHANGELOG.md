@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0-rc.4 - UTC/local automation schedule stabilization
+
+- Preserves the immutable `0.5.0-rc.3` package while moving the targeted correction to a new candidate.
+- Parses stored SQL dates explicitly as UTC and renders automation dates with the configured WordPress timezone, including fixed `UTC+3` and `Europe/Istanbul`.
+- Extends heartbeat health tolerance to 20 minutes for the approved quarter-hour external cron and shows a first-trigger waiting state.
+- Separates the next `:00/:15/:30/:45` server trigger from the next eligible publication time and recommends the confirmed cPanel `wget` command.
+- Records a secretless, categorized zero-publication summary without exposing exceptions, prompts, source content or credentials.
+
 ## 0.5.0-rc.3 - P0 automation heartbeat and cron recovery
 
 - Preserves the immutable `0.5.0-rc.2` package while moving the P0 correction to a new candidate.
