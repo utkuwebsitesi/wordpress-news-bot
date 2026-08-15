@@ -25,13 +25,16 @@ final class CronHealthTest extends TestCase
         $this->assertFalse(CronHealth::isHealthy());
     }
 
-    public function testLiveUtcHeartbeatIsDisplayedInFixedUtcPlusThreeAndHealthy():void
+    public function testExactLiveUtcHeartbeatAndRunRenderOnceInIstanbulAndRemainHealthy():void
     {
-        $GLOBALS['wpnb_test_timezone']=new \DateTimeZone('+03:00');$now=(new \DateTimeImmutable('2026-08-15 10:01:00',new \DateTimeZone('UTC')))->getTimestamp();
-        update_option('wpnb_heartbeat_last_success','2026-08-15 09:56:32',false);
-        $this->assertSame('2026-08-15 12:56:32',\WordPressNewsBot\Support::localDateTime(CronHealth::lastSuccess()));
+        $GLOBALS['wpnb_test_timezone']=new \DateTimeZone('Europe/Istanbul');$now=(new \DateTimeImmutable('2026-08-15 10:30:08 UTC'))->getTimestamp();
+        update_option('wpnb_heartbeat_last_success','2026-08-15 10:30:05',false);update_option('wpnb_last_automation_run','2026-08-15 10:30:07',false);
+        $this->assertSame((new \DateTimeImmutable('2026-08-15 10:30:05 UTC'))->getTimestamp(),CronHealth::lastSuccessTimestamp());
+        $this->assertSame('2026-08-15 13:30:05',\WordPressNewsBot\Support::localDateTime(CronHealth::lastSuccess()));
+        $this->assertSame('2026-08-15 13:30:05',\WordPressNewsBot\Support::localDateTime(CronHealth::lastSuccess()));
+        $this->assertSame('2026-08-15 13:30:07',\WordPressNewsBot\Support::localDateTime((string)get_option('wpnb_last_automation_run','')));
         $this->assertTrue(CronHealth::isHealthy(CronHealth::HEALTH_TOLERANCE_SECONDS,$now));
-        $this->assertSame('2026-08-15 13:15',\WordPressNewsBot\Support::localDateTime(CronHealth::nextExternalTrigger($now),'Y-m-d H:i'));
+        $this->assertSame('2026-08-15 13:45',\WordPressNewsBot\Support::localDateTime(CronHealth::nextExternalTrigger($now),'Y-m-d H:i'));
     }
 
     public function testHeartbeatBoundaryAndIstanbulConversion():void

@@ -27,9 +27,9 @@ final class CronHealth
     public static function isHealthy(int$maxAge=self::HEALTH_TOLERANCE_SECONDS,?int$now=null):bool
     {
         $timestamp=self::lastSuccessTimestamp();
-        return$timestamp!==null&&max(0,($now??time())-$timestamp)<=$maxAge;
+        return$timestamp!==null&&max(0,($now??Support::utcNowTimestamp())-$timestamp)<=$maxAge;
     }
-    public static function state(bool$automationEnabled=false,?int$now=null):string{$now=$now??time();$last=self::lastSuccessTimestamp();$enabledAt=Support::utcTimestamp((string)get_option('wpnb_automation_enabled_at',''));if($automationEnabled&&$enabledAt!==null&&($last===null||$last<$enabledAt)&&max(0,$now-$enabledAt)<=self::HEALTH_TOLERANCE_SECONDS)return'waiting';if(self::isHealthy(self::HEALTH_TOLERANCE_SECONDS,$now))return'healthy';return'unhealthy';}
+    public static function state(bool$automationEnabled=false,?int$now=null):string{$now=$now??Support::utcNowTimestamp();$last=self::lastSuccessTimestamp();$enabledAt=Support::utcTimestamp((string)get_option('wpnb_automation_enabled_at',''));if($automationEnabled&&$enabledAt!==null&&($last===null||$last<$enabledAt)&&max(0,$now-$enabledAt)<=self::HEALTH_TOLERANCE_SECONDS)return'waiting';if(self::isHealthy(self::HEALTH_TOLERANCE_SECONDS,$now))return'healthy';return'unhealthy';}
     public static function nextExternalTrigger(?int$now=null):int{return Support::nextQuarterHour($now);}
 
     /** @return array{ok:bool,test_id:string,error:string} */

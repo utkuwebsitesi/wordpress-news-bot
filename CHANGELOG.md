@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0-rc.5 - Live heartbeat timezone regression hardening
+
+- Removes the obsolete automation admin renderer that still contained local `strtotime()` age calculation, a five-minute threshold and legacy schedule output.
+- Adds the exact live regression: `10:30:05 UTC` heartbeat and `10:30:07 UTC` run render as `13:30:05` and `13:30:07` in Europe/Istanbul, remain healthy, and forecast `13:45` as the next external trigger.
+- Keeps the approved cPanel `0,15,30,45` schedule and `wget` command unchanged.
+
 ## 0.5.0-rc.4 - UTC/local automation schedule stabilization
 
 - Preserves the immutable `0.5.0-rc.3` package while moving the targeted correction to a new candidate.

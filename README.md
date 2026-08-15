@@ -1,12 +1,12 @@
 # WordPress News Bot
 
-Current candidate: `0.5.0-rc.4`
+Current candidate: `0.5.0-rc.5`
 
-0.5.0-rc.4 preserves the immutable rc.3 package and fixes UTC/local display, 20-minute heartbeat tolerance, quarter-hour external trigger forecasting and safe zero-publication diagnostics without changing the stable release line.
+0.5.0-rc.5 preserves the immutable rc.3 and rc.4 packages, removes the obsolete five-minute/local-time automation screen path, and locks the live `10:30 UTC -> 13:30 Europe/Istanbul` scenario into unit and real WordPress regression coverage.
 
 P0 manuel akış: `Kaynak ekle → Haberleri çek → Haber havuzunda incele → AI ile taslak oluştur → WordPress taslağını düzenle`. Kaynak bazlı ve toplu haber çekme işlemleri WP-Cron kapalıyken de aynı güvenli import servisini kullanır; kullanıcının WP-CLI, phpMyAdmin veya sunucu cron'una ihtiyacı yoktur.
 
-Durum: **release candidate / P0 otomasyon kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında Türkçe yönetim arayüzü, bağımsız heartbeat, dış cron, kota, zaman dağıtımı, kilit, hata ve duplicate senaryoları doğrulanmadan `0.5.0-rc.4` hazır veya production-ready kabul edilmez.
+Durum: **release candidate / P0 otomasyon kabulü bekliyor**. Production deploy yapılmamıştır; gerçek WordPress + MariaDB ortamında Türkçe yönetim arayüzü, bağımsız heartbeat, dış cron, kota, zaman dağıtımı, kilit, hata ve duplicate senaryoları doğrulanmadan `0.5.0-rc.5` hazır veya production-ready kabul edilmez.
 
 Geliştirici: **Utkuweb**
 
