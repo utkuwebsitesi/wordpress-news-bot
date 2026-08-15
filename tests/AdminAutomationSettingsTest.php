@@ -23,5 +23,8 @@ final class AdminAutomationSettingsTest extends TestCase
         $source=(string)file_get_contents(dirname(__DIR__).'/admin/Admin.php');
         $this->assertStringNotContainsString('escapeshellarg',$source);
         $this->assertStringContainsString('wp-cron.php',$source);
+        $this->assertStringContainsString('wget -q -O -',$source);
+        $this->assertStringContainsString('0,15,30,45',$source);
+        $this->assertStringNotContainsString('curl --fail --silent',$source);
     }
 }

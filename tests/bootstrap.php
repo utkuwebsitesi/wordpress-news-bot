@@ -2,7 +2,7 @@
 declare(strict_types=1);
 if (!defined('ARRAY_A')) { define('ARRAY_A', 'ARRAY_A'); }
 if (!defined('MINUTE_IN_SECONDS')) { define('MINUTE_IN_SECONDS', 60); }
-if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.5.0-rc.3'); }
+if (!defined('WPNB_VERSION')) { define('WPNB_VERSION', '0.5.0-rc.4'); }
 if (!defined('WPNB_SCHEMA_VERSION')) { define('WPNB_SCHEMA_VERSION', '2.0.0'); }
 if (!defined('HOUR_IN_SECONDS')) { define('HOUR_IN_SECONDS', 3600); }
 $GLOBALS['wpnb_test_options'] = [];
@@ -28,6 +28,8 @@ if (!function_exists('get_option')) { function get_option(string $key,mixed $def
 if (!function_exists('update_option')) { function update_option(string $key,mixed $value,mixed $autoload=null):bool { $GLOBALS['wpnb_test_options'][$key]=$value;return true; } }
 if (!function_exists('add_option')) { function add_option(string $key,mixed $value='',mixed $deprecated='',mixed $autoload=null):bool { if(array_key_exists($key,$GLOBALS['wpnb_test_options']))return false;$GLOBALS['wpnb_test_options'][$key]=$value;return true; } }
 if (!function_exists('delete_option')) { function delete_option(string $key):bool { unset($GLOBALS['wpnb_test_options'][$key]);return true; } }
+if (!function_exists('wp_timezone')) { function wp_timezone():DateTimeZone { return $GLOBALS['wpnb_test_timezone']??new DateTimeZone('UTC'); } }
+if (!function_exists('wp_date')) { function wp_date(string $format,?int $timestamp=null,?DateTimeZone $timezone=null):string { return (new DateTimeImmutable('@'.($timestamp??time())))->setTimezone($timezone??wp_timezone())->format($format); } }
 if (!function_exists('wp_remote_retrieve_header')) { function wp_remote_retrieve_header(array $r, string $name): string { return (string)($r['headers'][$name] ?? ''); } }
 require dirname(__DIR__) . '/includes/FeedParser.php'; require dirname(__DIR__) . '/includes/SourceUrl.php'; require dirname(__DIR__) . '/includes/Security.php'; require dirname(__DIR__) . '/includes/Support.php'; require dirname(__DIR__) . '/includes/DatabaseErrorClassifier.php'; require dirname(__DIR__) . '/includes/DatabaseSchema.php'; require dirname(__DIR__) . '/includes/DatabaseHealth.php'; require dirname(__DIR__) . '/includes/DiagnosticStore.php'; require dirname(__DIR__) . '/includes/DatabaseEngineRepairException.php'; require dirname(__DIR__) . '/includes/DatabaseEngineRepair.php'; require dirname(__DIR__) . '/includes/DatabaseRepair.php';
 require dirname(__DIR__) . '/includes/AiProvider.php'; require dirname(__DIR__) . '/includes/AiOutputRejectedException.php'; require dirname(__DIR__) . '/includes/AiOriginalityValidator.php'; require dirname(__DIR__) . '/includes/MockAiProvider.php'; require dirname(__DIR__) . '/includes/ContentSanitizer.php'; require dirname(__DIR__) . '/includes/AiResponseValidator.php'; require dirname(__DIR__) . '/includes/OpenAiProvider.php'; require dirname(__DIR__) . '/includes/SecretStorage.php'; require dirname(__DIR__) . '/includes/Credentials.php'; require dirname(__DIR__) . '/includes/ConnectionService.php'; require dirname(__DIR__) . '/includes/SetupState.php'; require dirname(__DIR__) . '/includes/DraftPolicy.php';

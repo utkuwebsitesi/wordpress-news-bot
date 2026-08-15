@@ -14,7 +14,7 @@ for _ in {1..60}; do
 done
 if (( ready == 0 )); then "${compose[@]}" logs wordpress; exit 1; fi
 "${compose[@]}" exec -T wordpress sh -c 'mkdir -p wp-content/mu-plugins && cp /integration/wpnb-test-mu.php wp-content/mu-plugins/wpnb-test-mu.php'
-"${compose[@]}" exec -T wordpress wp plugin install /artifacts/wordpress-news-bot-0.5.0-rc.3.zip --activate --allow-root
+"${compose[@]}" exec -T wordpress wp plugin install /artifacts/wordpress-news-bot-0.5.0-rc.4.zip --activate --allow-root
 "${compose[@]}" exec -T wordpress wp eval-file /integration/verify-install.php --allow-root
 "${compose[@]}" exec -T wordpress wp eval-file /integration/verify-feed-matrix.php --allow-root
 "${compose[@]}" exec -T wordpress wp option update wpnb_stabilization_sentinel preserved --allow-root >/dev/null

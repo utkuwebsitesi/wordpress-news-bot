@@ -370,7 +370,9 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.request.post("/?rest_route=/wpnb-test/v1/cron-state", { headers: { "x-wpnb-test": "1" }, data: { mode: "reset" } });
     await page.goto("/wp-admin/admin.php?page=wpnb-automation");
     await expect(page.locator("#wpnb-cron-command")).toContainText("wp-cron.php");
+    await expect(page.locator("#wpnb-cron-command")).toContainText("wget -q -O -");
     await expect(page.locator("#wpnb-cron-command")).not.toContainText("wpnb_automation_tick");
+    await expect(page.locator("body")).toContainText("0,15,30,45");
     await expect(page.locator("body")).toContainText("Otomasyon kapalı");
     for (const day of ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]) await expect(page.locator("body")).toContainText(day);
     for (const day of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]) await expect(page.locator("body")).not.toContainText(day);
@@ -391,6 +393,12 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(after.posts).toBe(before.posts);
     expect(after.ai_requests).toBe(before.ai_requests);
     expect(after.healthy).toBeTruthy();
+    for (const mode of ["offset", "istanbul"]) {
+      const timeResponse = await page.request.post("/?rest_route=/wpnb-test/v1/time-display", { headers: { "x-wpnb-test": "1" }, data: { mode } });
+      const display = await timeResponse.json();await page.reload();
+      await expect(page.locator("body")).toContainText(display.heartbeat_local);await expect(page.locator("body")).toContainText(display.run_local);await expect(page.locator("body")).toContainText(display.next_trigger_local);
+      expect(display.next_trigger_local).toMatch(/:(00|15|30|45)$/);expect(display.next_trigger_local).not.toMatch(/:\d{2}:\d{2}$/);
+    }
 
     await page.locator('input[name="automation_enabled"]').check();
     await page.locator('form:has(input[name="action"][value="wpnb_save_automation"]) button').click();
@@ -400,7 +408,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await expect(page.locator('input[name="automation_enabled"]')).not.toBeChecked();
     await page.request.post("/?rest_route=/wpnb-test/v1/cron-state", { headers: { "x-wpnb-test": "1" }, data: { mode: "stale" } });
     await page.reload();
-    await expect(page.locator("body")).toContainText("Son beş dakika içinde sunucu heartbeat'i alınmadı");
+    await expect(page.locator("body")).toContainText("20 dakikalık tolerans içinde sunucu heartbeat sinyali alınmadı");
     await page.request.post("/wp-cron.php");
     console.log(`P0 cron evidence: heartbeat=${after.heartbeat} posts_unchanged=${after.posts} ai_unchanged=${after.ai_requests} cron_disabled=true`);
     await page.request.post("/?rest_route=/wpnb-test/v1/ui-language", { headers: { "x-wpnb-test": "1" }, data: { language: "en" } });
@@ -433,7 +441,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(oldItem.wordpress_post_id).toBe("0");
     expect(oldItem.status).toBe("new");
     const fifth = await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { make_due: true, force: true } });
-    expect((await fifth.json()).message).toBe("daily_quota_complete");
+    const fifthResult = await fifth.json();expect(fifthResult.message).toBe("daily_quota_complete");expect(fifthResult.diagnostics.daily_limit).toBe(1);
     expect((await state(page)).published).toBe(before.published + 4);
 
     const nextDay = await page.request.post("/?rest_route=/wpnb-test/v1/automation-day-offset", { headers: { "x-wpnb-test": "1" }, data: { days: 1 } });
@@ -449,6 +457,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.request.post("/?rest_route=/wpnb-test/v1/automation-prune", { headers: { "x-wpnb-test": "1" }, data: { keep: aiSeed.id } });
     const aiFailure = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { force: true } })).json();
     expect(aiFailure.failed).toBe(1);
+    expect(aiFailure.diagnostics.ai_quality).toBe(1);
     expect((await state(page)).published).toBe(before.published + 5);
     await page.request.post("/?rest_route=/wpnb-test/v1/invalid-ai", { headers: { "x-wpnb-test": "1" }, data: { enabled: false } });
 
@@ -456,6 +465,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     await page.request.post("/?rest_route=/wpnb-test/v1/automation-prune", { headers: { "x-wpnb-test": "1" }, data: { keep: imageSeed.id } });
     const imageFailure = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-run", { headers: { "x-wpnb-test": "1" }, data: { force: true } })).json();
     expect(imageFailure.failed).toBe(1);
+    expect(imageFailure.diagnostics.image).toBe(1);
     expect((await state(page)).published).toBe(before.published + 5);
 
     const concurrentSeed = await (await page.request.post("/?rest_route=/wpnb-test/v1/automation-seed-one", { headers: { "x-wpnb-test": "1" } })).json();
