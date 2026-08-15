@@ -26,5 +26,7 @@ final class AdminAutomationSettingsTest extends TestCase
         $this->assertStringContainsString('wget -q -O -',$source);
         $this->assertStringContainsString('0,15,30,45',$source);
         $this->assertStringNotContainsString('curl --fail --silent',$source);
+        $this->assertStringNotContainsString('No server heartbeat was received in the last five minutes',$source);
+        $this->assertStringNotContainsString('strtotime($heartbeat)',$source);
     }
 }

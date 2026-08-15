@@ -29,7 +29,8 @@ final class Support
         if(function_exists('wp_date')&&function_exists('wp_timezone'))return wp_date($format,$timestamp,wp_timezone());
         return(new \DateTimeImmutable('@'.$timestamp))->setTimezone(self::siteNow()->getTimezone())->format($format);
     }
-    public static function nextQuarterHour(?int $timestamp=null):int{$timestamp=$timestamp??time();return intdiv($timestamp,15*MINUTE_IN_SECONDS)*15*MINUTE_IN_SECONDS+15*MINUTE_IN_SECONDS;}
+    public static function utcNowTimestamp():int{$now=time();return function_exists('apply_filters')?(int)apply_filters('wpnb_utc_now_timestamp',$now):$now;}
+    public static function nextQuarterHour(?int $timestamp=null):int{$timestamp=$timestamp??self::utcNowTimestamp();return intdiv($timestamp,15*MINUTE_IN_SECONDS)*15*MINUTE_IN_SECONDS+15*MINUTE_IN_SECONDS;}
     /** @return array{0:string,1:string} */
     public static function siteDayUtcBounds(?\DateTimeImmutable$now=null):array{$now=$now??self::siteNow();$start=$now->setTime(0,0)->setTimezone(new \DateTimeZone('UTC'));return[$start->format('Y-m-d H:i:s'),$start->modify('+1 day')->format('Y-m-d H:i:s')];}
     public static function json(mixed $value): string { return (string) wp_json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); }

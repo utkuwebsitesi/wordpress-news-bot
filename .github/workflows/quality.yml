@@ -34,4 +34,4 @@ jobs:
       - run: vendor/bin/phpunit --colors=never
       - run: php bin/quality-gates.php
       - run: php bin/compile-mo.php languages/wordpress-news-bot-tr_TR.po /tmp/wordpress-news-bot-tr_TR.mo && cmp /tmp/wordpress-news-bot-tr_TR.mo languages/wordpress-news-bot-tr_TR.mo
-      - run: mkdir -p dist && php bin/build-release.php 0.5.0-rc.4 "$PWD" "$PWD/dist/wordpress-news-bot-0.5.0-rc.4.zip"
+      - run: mkdir -p dist && php bin/build-release.php 0.5.0-rc.5 "$PWD" "$PWD/dist/wordpress-news-bot-0.5.0-rc.5.zip"

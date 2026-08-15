@@ -1,4 +1,4 @@
-param([string]$Version = '0.5.0-rc.4')
+param([string]$Version = '0.5.0-rc.5')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $out = Join-Path $root ("wordpress-news-bot-$Version.zip")

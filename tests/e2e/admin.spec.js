@@ -361,7 +361,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect(db.published).toBe(4);expect(db.drafts).toBe(1);expect(db.draft_statuses).toEqual(["draft"]);
     expect(db.category_links).toBe(47);
     console.log(
-      `RC4 publication evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} attachment_ids=${db.media.map((item) => item.id).join(",")} published=${db.published} published_ids=${db.published_records.map((post) => post.id).join(",")} thumbnail_ids=${db.published_records.map((post) => post.thumbnail_id).join(",")} drafts=${db.drafts} processed_pool=${db.processed_pool} cron_disabled=${db.cron_disabled}`,
+      `RC5 publication evidence: sources=${db.sources} feed_items=${db.feed_items} media=${db.media.length} attachment_ids=${db.media.map((item) => item.id).join(",")} published=${db.published} published_ids=${db.published_records.map((post) => post.id).join(",")} thumbnail_ids=${db.published_records.map((post) => post.thumbnail_id).join(",")} drafts=${db.drafts} processed_pool=${db.processed_pool} cron_disabled=${db.cron_disabled}`,
     );
   });
 
@@ -396,9 +396,13 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     for (const mode of ["offset", "istanbul"]) {
       const timeResponse = await page.request.post("/?rest_route=/wpnb-test/v1/time-display", { headers: { "x-wpnb-test": "1" }, data: { mode } });
       const display = await timeResponse.json();await page.reload();
-      await expect(page.locator("body")).toContainText(display.heartbeat_local);await expect(page.locator("body")).toContainText(display.run_local);await expect(page.locator("body")).toContainText(display.next_trigger_local);
-      expect(display.next_trigger_local).toMatch(/:(00|15|30|45)$/);expect(display.next_trigger_local).not.toMatch(/:\d{2}:\d{2}$/);
+      expect(display.heartbeat_utc).toBe("2026-08-15 10:30:05");expect(display.run_utc).toBe("2026-08-15 10:30:07");expect(display.heartbeat_local).toBe("2026-08-15 13:30:05");expect(display.run_local).toBe("2026-08-15 13:30:07");expect(display.next_trigger_local).toBe("2026-08-15 13:45");expect(display.healthy).toBeTruthy();
+      await expect(page.locator("body")).toContainText("2026-08-15 13:30:05");await expect(page.locator("body")).toContainText("2026-08-15 13:30:07");await expect(page.locator("body")).toContainText("2026-08-15 13:45");
+      await expect(page.locator("body")).not.toContainText("2026-08-15 13:32:05");await expect(page.locator("body")).not.toContainText("Son beş dakika içinde sunucu heartbeat'i alınmadı");await expect(page.locator("#wpnb-cron-command")).not.toContainText("curl");
+      console.log(`RC5 time evidence: timezone=${display.timezone} heartbeat_utc=${display.heartbeat_utc} heartbeat_local=${display.heartbeat_local} run_local=${display.run_local} next_trigger=${display.next_trigger_local} healthy=${display.healthy}`);
     }
+    await page.request.post("/?rest_route=/wpnb-test/v1/time-display", { headers: { "x-wpnb-test": "1" }, data: { mode: "clear" } });
+    await page.request.post("/wp-cron.php");await page.reload();
 
     await page.locator('input[name="automation_enabled"]').check();
     await page.locator('form:has(input[name="action"][value="wpnb_save_automation"]) button').click();
@@ -485,7 +489,7 @@ test.describe.serial("WordPress News Bot admin lifecycle", () => {
     expect((await state(page)).published).toBe(before.published + 6);
     await page.goto("/wp-admin/admin.php?page=wpnb-automation");
     await expect(page.locator("body")).toContainText("Last heartbeat");
-    console.log(`RC1 automation evidence: old_unprocessed=${setup.old_id} published=6 daily_limit=4 next_day_reset=1 duplicate_posts=0 cron_disabled=${db.cron_disabled}`);
+    console.log(`RC5 automation evidence: old_unprocessed=${setup.old_id} published=6 daily_limit=4 next_day_reset=1 duplicate_posts=0 cron_disabled=${db.cron_disabled}`);
   });
 
   test("renders all admin pages at desktop and mobile widths without console errors", async () => {
